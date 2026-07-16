@@ -1,17 +1,10 @@
 const navMenu = document.getElementById('nav-menu');
 const navToggle = document.getElementById('nav-toggle');
-const navClose = document.getElementById('nav-close');
 const navLinks = document.querySelectorAll('.nav__link');
 
 if (navToggle) {
     navToggle.addEventListener('click', () => {
-        navMenu.classList.add('show-menu');
-    });
-}
-
-if (navClose) {
-    navClose.addEventListener('click', () => {
-        navMenu.classList.remove('show-menu');
+        navMenu.classList.toggle('show-menu');
     });
 }
 
@@ -23,7 +16,7 @@ navLinks.forEach(link => {
 
 const header = document.getElementById('header');
 function scrollHeader() {
-    if (this.scrollY >= 50) {
+    if (window.scrollY >= 50) {
         header.classList.add('blur-header');
     } else {
         header.classList.remove('blur-header');
@@ -33,7 +26,7 @@ window.addEventListener('scroll', scrollHeader);
 
 const scrollUp = () => {
     const scrollUpBtn = document.getElementById('scroll-up');
-    if (this.scrollY >= 350) {
+    if (window.scrollY >= 350) {
         scrollUpBtn.classList.add('show-scroll');
     } else {
         scrollUpBtn.classList.remove('show-scroll');
@@ -43,7 +36,7 @@ window.addEventListener('scroll', scrollUp);
 
 const sections = document.querySelectorAll('section[id]');
 function scrollActive() {
-    const scrollY = window.pageYOffset;
+    const scrollY = window.scrollY;
 
     sections.forEach(current => {
         const sectionHeight = current.offsetHeight;
@@ -60,7 +53,13 @@ function scrollActive() {
 }
 window.addEventListener('scroll', scrollActive);
 
-const sr = window.scrollReveal || null;
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta) return meta.getAttribute('content');
+    const input = document.querySelector('input[name="_token"]');
+    if (input) return input.value;
+    return '';
+}
 
 const contactForm = document.getElementById('contact-form');
 const contactMessage = document.getElementById('contact-message');
@@ -69,32 +68,40 @@ if (contactForm) {
     contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(contactForm);
-        
+        const csrfToken = getCsrfToken();
+
         try {
             const response = await fetch(contactForm.action, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
                 },
                 body: formData,
             });
-            
+
+            const data = await response.json();
+
             if (!response.ok) {
-                const data = await response.json();
+                if (response.status === 422 && data.errors) {
+                    const firstError = Object.values(data.errors)[0][0];
+                    throw new Error(firstError || 'Validation failed.');
+                }
                 throw new Error(data.message || 'Something went wrong');
             }
-            
-            const data = await response.json();
+
             contactMessage.textContent = data.message || 'Message sent successfully!';
-            
+            contactMessage.style.color = '#50C878';
+
             setTimeout(() => {
                 contactMessage.textContent = '';
             }, 5000);
-            
+
             contactForm.reset();
         } catch (error) {
             contactMessage.textContent = error.message || 'Something went wrong!';
-            
+            contactMessage.style.color = '#dc3545';
+
             setTimeout(() => {
                 contactMessage.textContent = '';
             }, 5000);

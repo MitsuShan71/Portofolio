@@ -47,14 +47,29 @@
             width: 100%;
             padding: 0.75rem 1rem;
             border-radius: 0.5rem;
-            background: #3a3d4a;
-            color: var(--color-title);
+            background: #fff;
+            color: #333;
             border: none;
             outline: none;
             font-family: inherit;
             font-size: 0.938rem;
         }
         input:focus { box-shadow: 0 0 0 2px var(--color-first); }
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-right: 2.5rem; }
+        .toggle-password {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0;
+            line-height: 1;
+        }
         .btn {
             width: 100%;
             padding: 0.75rem;
@@ -96,10 +111,29 @@
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" required>
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="password" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword()" tabindex="-1">
+                        <i class="ri-eye-line" id="password-icon"></i>
+                    </button>
+                </div>
             </div>
             <button type="submit" class="btn"><i class="ri-login-circle-line"></i> Sign In</button>
         </form>
     </div>
+
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('password-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'ri-eye-off-line';
+            } else {
+                input.type = 'password';
+                icon.className = 'ri-eye-line';
+            }
+        }
+    </script>
 </body>
 </html>

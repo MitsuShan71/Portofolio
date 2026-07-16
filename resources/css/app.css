@@ -110,26 +110,104 @@ img {
     color: var(--color-first);
 }
 
-.nav__toggle,
-.nav__close {
+.nav__toggle {
     display: flex;
     font-size: 1.25rem;
     color: var(--color-title);
     cursor: pointer;
 }
 
+.nav__admin {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-right: 1.5rem;
+}
+
+.nav__admin-link {
+    color: var(--color-title);
+    font-size: 0.813rem;
+    font-weight: var(--font-medium);
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.nav__admin-link:hover {
+    background-color: var(--color-first);
+    color: var(--color-title);
+}
+
+.nav__login-link {
+    color: var(--color-title);
+    font-size: 0.813rem;
+    font-weight: var(--font-medium);
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-right: 1.5rem;
+}
+
+.nav__login-link:hover {
+    background-color: var(--color-first);
+    color: var(--color-title);
+}
+
+@media screen and (max-width: 1023px) {
+    .nav__admin {
+        position: fixed;
+        top: 0.5rem;
+        right: 3.5rem;
+        z-index: 100;
+    }
+    .nav__admin-link {
+        background-color: rgba(30, 32, 38, 0.9);
+        backdrop-filter: blur(8px);
+        padding: 0.25rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    .nav__login-link {
+        position: fixed;
+        top: 0.5rem;
+        right: 3.5rem;
+        z-index: 100;
+        background-color: rgba(30, 32, 38, 0.9);
+        backdrop-filter: blur(8px);
+        padding: 0.25rem 0.6rem;
+        font-size: 0.75rem;
+    }
+}
+
+
+
+
+
+
+
 @media screen and (max-width: 1023px) {
     .nav__menu {
+        display: none;
         position: fixed;
-        top: 0;
-        right: -100%;
+        top: 3.5rem;
+        left: 0;
         background-color: rgba(30, 32, 38, 0.95);
-        width: 75%;
-        height: 100%;
-        padding: 4.5rem 0 0 3rem;
+        width: 100%;
+        padding: 2rem;
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
-        transition: right 0.4s;
+        border-radius: 0 0 1rem 1rem;
+        z-index: 99;
+    }
+
+    .show-menu {
+        display: block;
+        width: 100%;
     }
 }
 
@@ -155,6 +233,8 @@ img {
     padding: 0.25rem 0.75rem;
     border-radius: 2rem;
     transition: background-color 0.4s;
+    display: inline-block;
+    width: fit-content;
 }
 
 .nav__link--contact:hover,
@@ -163,15 +243,7 @@ img {
     background-color: var(--color-first-alt);
 }
 
-.nav__close {
-    position: absolute;
-    top: 1rem;
-    right: 1.5rem;
-}
 
-.show-menu {
-    right: 0;
-}
 
 .active-link {
     color: var(--color-first);
@@ -206,6 +278,13 @@ img {
     border-radius: 1rem;
     max-width: 700px;
     margin-inline: auto;
+    border: 2px solid transparent;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.about__box:hover {
+    border-color: var(--color-first);
+    box-shadow: 0 0 12px var(--color-first);
 }
 
 .about__description {
@@ -213,18 +292,25 @@ img {
     max-width: 600px;
     margin-inline: auto;
     color: var(--color-title);
+    font-size: 1.05rem;
 }
 
 .skills__description {
     color: var(--color-title);
+    text-align: center;
 }
 
 .home__container {
     padding-top: 2rem;
-    row-gap: 2.5rem;
+    row-gap: 1.5rem;
     column-gap: 5rem;
     align-items: center;
-    transform: translateX(-1.5rem);
+}
+
+@media screen and (min-width: 768px) {
+    .home__container {
+        transform: translateX(-1.5rem);
+    }
 }
 
 .home__content {
@@ -344,26 +430,6 @@ img {
     position: relative;
 }
 
-.skill-box__label {
-    display: none;
-    font-size: 0.813rem;
-    font-weight: var(--font-medium);
-    color: var(--color-first);
-    background-color: hsl(140, 50%, 20%);
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.5rem;
-    white-space: nowrap;
-    position: absolute;
-    bottom: -2.5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-}
-
-.skill-box-wrapper:hover .skill-box__label {
-    display: block;
-}
-
 .skill-box-wrapper:hover .skill-box {
     border: 2px solid var(--color-first);
     transform: translateY(-0.5rem);
@@ -393,7 +459,11 @@ img {
     padding: 0.25rem 0.75rem;
     border-radius: 0.5rem;
     white-space: nowrap;
-    margin-top: 0.5rem;
+    position: absolute;
+    bottom: -2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
     transition: opacity 0.3s, visibility 0.3s;
 }
 
@@ -452,6 +522,11 @@ img {
     overflow: hidden;
     height: 220px;
     background-color: hsl(228, 15%, 8%);
+    transition: transform 0.3s ease;
+}
+
+.projects__card:hover {
+    transform: translateY(-1rem);
 }
 
 .projects__img {
@@ -490,6 +565,15 @@ img {
 .projects__title {
     font-size: 1.25rem;
     margin-bottom: 0.75rem;
+}
+
+.projects__description {
+    font-size: 0.813rem;
+    color: var(--color-title);
+    text-align: center;
+    padding: 0 1rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
 }
 
 .projects__button {
@@ -750,12 +834,6 @@ img {
     }
 }
 
-@media screen and (max-width: 420px) {
-    .skills__boxes {
-        grid-template-columns: 1fr;
-    }
-}
-
 @media screen and (max-width: 767px) {
     .profile-frame {
         max-width: 250px;
@@ -763,9 +841,26 @@ img {
     .home__container {
         justify-items: center;
         padding-top: 4rem;
+        transform: none;
+    }
+    .home__data {
+        text-align: center;
+    }
+    .home__image {
+        justify-self: center;
+    }
+    .home__buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .home__buttons .button {
+        justify-content: center;
     }
     .skill-box-wrapper {
         margin-bottom: 2.5rem;
+    }
+    .skills__boxes .skill-box-wrapper:last-child {
+        grid-column: 1 / -1;
     }
 }
 
@@ -827,11 +922,12 @@ img {
     .section__subtitle {
         font-size: 1.25rem;
     }
-    .nav__close,
     .nav__toggle {
         display: none;
     }
     .nav__menu {
+        display: block;
+        top: auto;
         width: initial;
     }
     .nav__list {
@@ -898,7 +994,7 @@ img {
     }
     .projects__container {
         grid-template-columns: repeat(3, 320px);
-        row-gap: 3rem;
+    row-gap: 2rem;
         padding-block: 2.5rem 4rem;
     }
     .projects__card {
