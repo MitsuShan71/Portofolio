@@ -14,10 +14,11 @@ class AdminController extends Controller
 
     public function login(Request $request)
     {
-        $rateLimitKey = 'login:' . ($request->ip() ?? 'unknown');
+        $rateLimitKey = 'login:'.($request->ip() ?? 'unknown');
 
         if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
             $seconds = RateLimiter::availableIn($rateLimitKey);
+
             return back()->withErrors([
                 'login' => "Too many login attempts. Please try again in {$seconds} seconds.",
             ])->onlyInput('username');
@@ -31,7 +32,7 @@ class AdminController extends Controller
         $username = config('admin.username');
         $password = config('admin.password');
 
-        if (!$username || !$password) {
+        if (! $username || ! $password) {
             return back()->withErrors([
                 'login' => 'Admin credentials are not configured. Please set ADMIN_USERNAME and ADMIN_PASSWORD in your .env file.',
             ])->onlyInput('username');

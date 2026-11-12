@@ -11,6 +11,7 @@ class ProjectController extends Controller
     public function index()
     {
         $projects = Project::all();
+
         return view('admin.projects.index', compact('projects'));
     }
 
@@ -92,6 +93,7 @@ class ProjectController extends Controller
         } else {
             $project->update($validated);
         }
+
         return redirect()->route('admin.projects.index')
             ->with('success', 'Project updated successfully.');
     }

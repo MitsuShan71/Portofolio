@@ -23,7 +23,7 @@ class ContactController extends Controller
             $fromEmail = config('mail.from.address');
             $fromName = config('mail.from.name', 'Portfolio');
 
-            if (!$fromEmail || $fromEmail === 'hello@example.com') {
+            if (! $fromEmail || $fromEmail === 'hello@example.com') {
                 Log::warning('Contact form: MAIL_FROM_ADDRESS is not configured properly.');
             } else {
                 Mail::raw("Name: {$validated['name']}\nEmail: {$validated['email']}\n\nMessage:\n{$validated['message']}", function ($mail) use ($validated, $fromEmail, $fromName) {
@@ -33,7 +33,7 @@ class ContactController extends Controller
                 });
             }
         } catch (\Throwable $e) {
-            Log::error('Contact form mail failed: ' . $e->getMessage());
+            Log::error('Contact form mail failed: '.$e->getMessage());
         }
 
         return response()->json(['message' => 'Message sent successfully!']);
