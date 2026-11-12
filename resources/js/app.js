@@ -1,18 +1,39 @@
 const navMenu = document.getElementById('nav-menu');
 const navToggle = document.getElementById('nav-toggle');
 const navLinks = document.querySelectorAll('.nav__link');
+const navToggleIcon = navToggle?.querySelector('i');
 
-if (navToggle) {
-    navToggle.addEventListener('click', () => {
-        navMenu.classList.toggle('show-menu');
-    });
+function closeNavigation() {
+    if (!navMenu || !navToggle) return;
+    navMenu.classList.remove('show-menu');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.setAttribute('aria-label', 'Buka navigasi');
+    if (navToggleIcon) navToggleIcon.className = 'ri-menu-line';
 }
 
-navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-        navMenu.classList.remove('show-menu');
+if (navMenu && navToggle) {
+    navToggle.addEventListener('click', () => {
+        const isOpen = navMenu.classList.toggle('show-menu');
+        navToggle.setAttribute('aria-expanded', String(isOpen));
+        navToggle.setAttribute('aria-label', isOpen ? 'Tutup navigasi' : 'Buka navigasi');
+        if (navToggleIcon) navToggleIcon.className = isOpen ? 'ri-close-line' : 'ri-menu-line';
     });
-});
+
+    navLinks.forEach(link => link.addEventListener('click', closeNavigation));
+
+    document.addEventListener('click', event => {
+        const path = event.composedPath();
+        if (!path.includes(navMenu) && !path.includes(navToggle)) closeNavigation();
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeNavigation();
+    });
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1400) closeNavigation();
+    });
+}
 
 const header = document.getElementById('header');
 function scrollHeader() {
@@ -107,4 +128,64 @@ if (contactForm) {
             }, 5000);
         }
     });
+}
+const themeToggle = document.getElementById('theme-toggle');
+
+if (themeToggle) {
+    const savedTheme = localStorage.getItem('portfolio-theme');
+    const initialTheme = savedTheme === 'light' ? 'light' : 'dark';
+
+    const applyTheme = theme => {
+        document.documentElement.dataset.theme = theme;
+        const nextTheme = theme === 'dark' ? 'light' : 'dark';
+        themeToggle.innerHTML = `<i class="ri-${nextTheme === 'light' ? 'sun' : 'moon'}-line" aria-hidden="true"></i>`;
+        themeToggle.setAttribute('aria-label', `Switch to ${nextTheme} mode`);
+        themeToggle.title = `Switch to ${nextTheme} mode`;
+    };
+
+    applyTheme(initialTheme);
+
+    themeToggle.addEventListener('click', () => {
+        const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('portfolio-theme', nextTheme);
+        applyTheme(nextTheme);
+    });
+}
+
+document.querySelectorAll('[data-open-project]').forEach(button => {
+    button.addEventListener('click', () => {
+        const dialog = document.getElementById(button.dataset.openProject);
+        if (dialog instanceof HTMLDialogElement) dialog.showModal();
+    });
+});
+
+document.querySelectorAll('[data-close-project]').forEach(button => {
+    button.addEventListener('click', () => button.closest('dialog')?.close());
+});
+
+document.querySelectorAll('.project-dialog').forEach(dialog => {
+    dialog.addEventListener('click', event => {
+        if (event.target === dialog) dialog.close();
+    });
+});
+
+const revealTargets = document.querySelectorAll(
+    'main > .section:not(#home) > .section__subtitle, main > .section:not(#home) > .section__title, main > .section:not(#home) > .container'
+);
+
+if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -32px 0px' });
+
+    revealTargets.forEach(target => {
+        target.classList.add('reveal-on-scroll');
+        revealObserver.observe(target);
+    });
+} else {
+    revealTargets.forEach(target => target.classList.add('is-visible'));
 }

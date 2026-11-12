@@ -22,9 +22,19 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|max:255',
-            'description' => 'nullable',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'link' => 'nullable|url|max:255',
+            'problem_solved' => 'nullable|string',
+            'objective' => 'nullable|string',
+            'technologies' => 'nullable|string',
+            'role' => 'nullable|string',
+            'features' => 'nullable|string',
+            'demo_link' => 'nullable|url|max:255',
+            'github_link' => 'nullable|url|max:255',
+            'process_documentation' => 'nullable|string',
+            'user_feedback' => 'nullable|string',
+            'details' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
@@ -51,21 +61,37 @@ class ProjectController extends Controller
     public function update(Request $request, Project $project)
     {
         $validated = $request->validate([
-            'title' => 'required|max:255',
-            'description' => 'nullable',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'link' => 'nullable|url|max:255',
+            'problem_solved' => 'nullable|string',
+            'objective' => 'nullable|string',
+            'technologies' => 'nullable|string',
+            'role' => 'nullable|string',
+            'features' => 'nullable|string',
+            'demo_link' => 'nullable|url|max:255',
+            'github_link' => 'nullable|url|max:255',
+            'process_documentation' => 'nullable|string',
+            'user_feedback' => 'nullable|string',
+            'details' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
-            if ($project->image) {
-                Storage::disk('public')->delete($project->image);
+            $newImage = $request->file('image')->store('projects', 'public');
+            if ($newImage !== false) {
+                $oldImage = $project->image;
+                $validated['image'] = $newImage;
+                $project->update($validated);
+                if ($oldImage) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+            } else {
+                $project->update($validated);
             }
-            $validated['image'] = $request->file('image')->store('projects', 'public');
+        } else {
+            $project->update($validated);
         }
-
-        $project->update($validated);
-
         return redirect()->route('admin.projects.index')
             ->with('success', 'Project updated successfully.');
     }

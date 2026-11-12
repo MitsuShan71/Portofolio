@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -16,27 +17,25 @@ class ContactController extends Controller
             'message' => 'required|string',
         ]);
 
+        Message::create($validated);
+
         try {
             $fromEmail = config('mail.from.address');
             $fromName = config('mail.from.name', 'Portfolio');
 
             if (!$fromEmail || $fromEmail === 'hello@example.com') {
                 Log::warning('Contact form: MAIL_FROM_ADDRESS is not configured properly.');
-                return response()->json([
-                    'message' => 'Contact form is not configured. Please contact the administrator.',
-                ], 500);
+            } else {
+                Mail::raw("Name: {$validated['name']}\nEmail: {$validated['email']}\n\nMessage:\n{$validated['message']}", function ($mail) use ($validated, $fromEmail, $fromName) {
+                    $mail->from($fromEmail, $fromName)
+                        ->to(config('admin.mail_to'))
+                        ->subject("Portfolio Contact: {$validated['name']}");
+                });
             }
-
-            Mail::raw("Name: {$validated['name']}\nEmail: {$validated['email']}\n\nMessage:\n{$validated['message']}", function ($mail) use ($validated, $fromEmail, $fromName) {
-                $mail->from($fromEmail, $fromName)
-                    ->to(config('admin.mail_to'))
-                    ->subject("Portfolio Contact: {$validated['name']}");
-            });
-
-            return response()->json(['message' => 'Message sent successfully!']);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Contact form mail failed: ' . $e->getMessage());
-            return response()->json(['message' => 'Failed to send message. Please try again.'], 500);
         }
+
+        return response()->json(['message' => 'Message sent successfully!']);
     }
 }

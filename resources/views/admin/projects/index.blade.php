@@ -82,7 +82,12 @@
                                 <span style="color: #666; font-size: 0.813rem;">No image</span>
                             @endif
                         </td>
-                        <td>{{ $project->title }}</td>
+                        <td>
+                            <a href="{{ route('admin.projects.show', $project) }}">{{ $project->title }}</a>
+                            @if ($project->description)
+                                <div>{{ \Illuminate\Support\Str::limit($project->description, 100) }}</div>
+                            @endif
+                        </td>
                         <td class="actions">
                             <a href="{{ route('admin.projects.edit', $project) }}" class="btn btn-edit">
                                 <i class="ri-edit-line"></i>

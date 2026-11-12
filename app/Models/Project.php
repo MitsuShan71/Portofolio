@@ -14,5 +14,15 @@ class Project extends Model
         'description',
         'image',
         'link',
+        'problem_solved',
+        'objective',
+        'technologies',
+        'role',
+        'features',
+        'demo_link',
+        'github_link',
+        'process_documentation',
+        'user_feedback',
+        'details',
     ];
 }

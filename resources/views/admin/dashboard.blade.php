@@ -53,6 +53,12 @@
                     <p>Create, edit, and delete portfolio projects</p>
                 </div>
             </a>
+            <a href="{{ route('admin.profile.edit') }}" class="card"><div class="card-icon"><i class="ri-user-line"></i></div><div><h3>Profil</h3><p>Kelola informasi profil dan kontak</p></div></a>
+            <a href="{{ route('admin.skills.index') }}" class="card"><div class="card-icon"><i class="ri-bar-chart-line"></i></div><div><h3>Keahlian</h3><p>Atur hard skill, soft skill, dan persentase</p></div></a>
+            <a href="{{ route('admin.experiences.index') }}" class="card"><div class="card-icon"><i class="ri-briefcase-line"></i></div><div><h3>Pengalaman</h3><p>Kelola PLK, organisasi, dan lomba</p></div></a>
+            <a href="{{ route('admin.certificates.index') }}" class="card"><div class="card-icon"><i class="ri-award-line"></i></div><div><h3>Sertifikat</h3><p>Tambah dan hapus sertifikat atau prestasi</p></div></a>
+            <a href="{{ route('admin.messages.index') }}" class="card"><div class="card-icon"><i class="ri-mail-line"></i></div><div><h3>Pesan Kontak</h3><p>Tinjau pesan yang dikirim pengunjung</p></div></a>
+            <a href="{{ route('admin.feedback.index') }}" class="card"><div class="card-icon"><i class="ri-chat-1-line"></i></div><div><h3>Kesan dan Pesan</h3><p>Tinjau masukan pengunjung</p></div></a>
             <a href="/" class="card">
                 <div class="card-icon"><i class="ri-eye-line"></i></div>
                 <div>
