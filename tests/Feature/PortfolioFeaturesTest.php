@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Article;
 use App\Models\Certificate;
 use App\Models\Experience;
 use App\Models\Feedback;
@@ -11,6 +12,8 @@ use App\Models\Project;
 use App\Models\Skill;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -25,8 +28,37 @@ class PortfolioFeaturesTest extends TestCase
             ->assertSee('Shan Favian Efendy')
             ->assertSee('Kelas XII A')
             ->assertSee('PPLG')
+            ->assertSee('Fokus & minat')
+            ->assertSee('UI/UX Design')
+            ->assertSee('pengembangan web')
             ->assertSee('PLK — Periode 1')
-            ->assertSee('Lihat CV');
+            ->assertSee('Unduh CV');
+    }
+
+    public function test_about_section_lists_plk_and_organization_experiences(): void
+    {
+        Experience::create([
+            'category' => 'organization',
+            'title' => 'OSIS',
+            'organization' => 'SMK Negeri 2 Banjarmasin',
+            'start_date' => '2025-01-01',
+        ]);
+
+        $response = $this->get('/');
+        $response->assertOk()
+            ->assertSeeInOrder([
+                'Tujuan karir',
+                'Pengalaman PLK',
+                'PLK — Periode 1',
+                'PLK — Periode 2',
+                'Organisasi & Kepanitiaan',
+                'OSIS',
+            ]);
+
+        $this->assertSame(
+            ['PLK — Periode 1', 'PLK — Periode 2'],
+            $response->viewData('experiences')->get('plk')->pluck('title')->all(),
+        );
     }
 
     public function test_homepage_renders_percentage_skills_and_project_preview_details(): void
@@ -55,6 +87,7 @@ class PortfolioFeaturesTest extends TestCase
 
         $this->get('/')
             ->assertOk()
+            ->assertSeeInOrder(['Halo, saya', 'Keahlian', 'Figma', 'Pratinjau detail'])
             ->assertSee('Figma')
             ->assertSee('73%')
             ->assertSee('role="progressbar"', false)
@@ -65,13 +98,60 @@ class PortfolioFeaturesTest extends TestCase
             ->assertSee('https://github.com/example/repo');
     }
 
+    public function test_published_article_page_renders_with_owner_profile(): void
+    {
+        $this->get('/')->assertOk();
+
+        $article = Article::create([
+            'title' => 'Catatan desain',
+            'slug' => 'catatan-desain',
+            'excerpt' => 'Ringkasan catatan desain.',
+            'body' => 'Isi lengkap catatan desain.',
+            'published_at' => now()->subMinute(),
+        ]);
+
+        $this->get(route('articles.show', $article->slug))
+            ->assertOk()
+            ->assertSee('Catatan desain')
+            ->assertSee('Ringkasan catatan desain.')
+            ->assertSee('Isi lengkap catatan desain.')
+            ->assertSee('Shan Favian Efendy')
+            ->assertSee('PPLG')
+            ->assertSee('Kembali ke artikel');
+
+        $draft = Article::create([
+            'title' => 'Draf artikel',
+            'slug' => 'draf-artikel',
+            'body' => 'Belum terbit.',
+            'published_at' => null,
+        ]);
+
+        $this->get(route('articles.show', $draft->slug))->assertNotFound();
+    }
+
     public function test_contact_and_feedback_forms_persist_submissions(): void
     {
+        config([
+            'mail.default' => 'array',
+            'mail.from.address' => 'portfolio@example.test',
+            'admin.mail_to' => 'shanfavianeffendy@gmail.com',
+        ]);
+
+        $recipients = [];
+        Event::listen(MessageSent::class, function (MessageSent $event) use (&$recipients): void {
+            $recipients = array_map(
+                fn ($address) => $address->getAddress(),
+                $event->message->getTo(),
+            );
+        });
+
         $this->postJson('/contact', [
             'name' => 'Portfolio visitor',
             'email' => 'visitor@example.test',
             'message' => 'Please contact me.',
         ])->assertOk();
+
+        $this->assertSame(['shanfavianeffendy@gmail.com'], $recipients);
 
         $this->post('/feedback', [
             'name' => 'Portfolio visitor',
@@ -87,6 +167,26 @@ class PortfolioFeaturesTest extends TestCase
             'message' => 'The portfolio is easy to use.',
         ]);
     }
+    public function test_contact_form_reports_when_email_transport_only_logs(): void
+    {
+        config([
+            'mail.default' => 'log',
+            'mail.from.address' => 'portfolio@example.test',
+        ]);
+
+        $this->postJson('/contact', [
+            'name' => 'Portfolio visitor',
+            'email' => 'visitor@example.test',
+            'message' => 'Please contact me.',
+        ])->assertStatus(503)
+            ->assertJsonPath('message', 'Pesan tersimpan, tetapi email belum terkirim. Konfigurasi Gmail SMTP belum lengkap.');
+
+        $this->assertDatabaseHas((new Message)->getTable(), [
+            'email' => 'visitor@example.test',
+            'message' => 'Please contact me.',
+        ]);
+    }
+
 
     public function test_admin_content_routes_require_session_and_can_save_content(): void
     {
@@ -125,6 +225,7 @@ class PortfolioFeaturesTest extends TestCase
                 'summary' => 'Updated summary',
                 'bio' => 'Updated bio',
                 'education' => 'SMK Negeri 2 Banjarmasin',
+                'technology_interests' => 'Accessibility and frontend development',
                 'career_goal' => 'UI/UX Designer',
                 'email' => 'owner@example.test',
                 'github_url' => 'https://github.com/owner',
@@ -154,14 +255,29 @@ class PortfolioFeaturesTest extends TestCase
                 'github_link' => 'https://github.com/owner/project',
                 'process_documentation' => 'Research and prototype',
                 'user_feedback' => 'Clear and easy to use',
-                'details' => 'Project background',
+                'image' => UploadedFile::fake()->createWithContent(
+                    'project.png',
+                    base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/i8sAAAAASUVORK5CYII=')
+                ),
             ])->assertRedirect(route('admin.projects.index'));
 
-        $this->assertDatabaseHas('projects', [
-            'title' => 'Admin-created project',
-            'problem_solved' => 'Problem',
-            'github_link' => 'https://github.com/owner/project',
-        ]);
+        $project = Project::where('title', 'Admin-created project')->firstOrFail();
+        Storage::disk('public')->assertExists($project->image);
+
+        $this->withSession(['admin_logged_in' => true])
+            ->put(route('admin.projects.update', $project), ['title' => $project->title])
+            ->assertRedirect(route('admin.projects.index'));
+
+        Storage::disk('public')->assertExists($project->image);
+    }
+
+    public function test_new_projects_require_a_screenshot(): void
+    {
+        $this->withSession(['admin_logged_in' => true])
+            ->post(route('admin.projects.store'), ['title' => 'Project without screenshot'])
+            ->assertSessionHasErrors('image');
+
+        $this->assertDatabaseMissing('projects', ['title' => 'Project without screenshot']);
     }
 
     public function test_admin_can_upload_and_delete_certificate_documentation(): void

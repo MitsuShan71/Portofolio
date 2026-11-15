@@ -14,3 +14,9 @@
 - Widened the home call-to-action buttons and prevented label wrapping across tablet and mobile layouts.
 
 - Shifted the header logo slightly left to align with the requested spacing.
+
+## 2026-11-15
+
+- Added editable technology-interest/focus information to the About section.
+
+- Smoothed anchor scrolling, made section reveals play once, and extended light/dark color transitions to 550 ms.
