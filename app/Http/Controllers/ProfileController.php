@@ -24,6 +24,7 @@ class ProfileController extends Controller
             'summary' => ['sometimes', 'nullable', 'string'],
             'bio' => ['sometimes', 'nullable', 'string'],
             'education' => ['sometimes', 'nullable', 'string'],
+            'technology_interests' => ['sometimes', 'nullable', 'string'],
             'career_goal' => ['sometimes', 'nullable', 'string'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'github_url' => ['sometimes', 'nullable', 'url', 'max:255'],

@@ -2,6 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Article;
+use App\Models\Certificate;
+use App\Models\Experience;
+use App\Models\Message;
+use App\Models\PortfolioProfile;
+use App\Models\Project;
+use App\Models\Skill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -54,7 +61,21 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-        return view('admin.dashboard');
+        $profile = PortfolioProfile::first();
+        $firstName = $profile?->full_name
+            ? explode(' ', trim($profile->full_name))[0]
+            : 'Admin';
+
+        $counts = [
+            'projects' => Project::count(),
+            'articles' => Article::count(),
+            'experiences' => Experience::count(),
+            'skills' => Skill::count(),
+            'certificates' => Certificate::count(),
+            'messages' => Message::count(),
+        ];
+
+        return view('admin.dashboard', compact('firstName', 'counts'));
     }
 
     public function logout(Request $request)

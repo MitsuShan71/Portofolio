@@ -15,6 +15,7 @@ class PortfolioProfile extends Model
         'summary',
         'bio',
         'education',
+        'technology_interests',
         'career_goal',
         'email',
         'github_url',

@@ -36,7 +36,7 @@ class ProjectController extends Controller
             'process_documentation' => 'nullable|string',
             'user_feedback' => 'nullable|string',
             'details' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
@@ -75,7 +75,7 @@ class ProjectController extends Controller
             'process_documentation' => 'nullable|string',
             'user_feedback' => 'nullable|string',
             'details' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image' => [$project->image ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         if ($request->hasFile('image')) {

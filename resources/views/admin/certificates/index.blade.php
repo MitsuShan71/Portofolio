@@ -1,51 +1,104 @@
 @extends('layouts.admin')
 
-@section('title', 'Manage Certificates')
-
-@section('styles')
-    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
-    h1 { color: var(--color-title); margin-bottom: 1.5rem; }
-    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
-    .btn-primary { background: var(--color-first); color: var(--color-title); }
-    .btn-edit { background: #ffc107; color: #000; }
-    .btn-danger { background: #dc3545; color: #fff; }
-    .alert { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; background: #198754; color: #fff; }
-    .table-wrapper { border-radius: 0.5rem; overflow: hidden; border: 1px solid var(--color-title); }
-    table { width: 100%; border-collapse: collapse; background: var(--color-container); }
-    th, td { padding: 1rem; text-align: left; }
-    th { color: var(--color-title); font-weight: 600; background: #1a1c26; }
-    td { color: var(--color-text); }
-    .actions { display: flex; gap: 0.5rem; }
-    form.inline { display: inline; }
-@endsection
+@section('title', 'Sertifikat')
 
 @section('content')
-    <div class="container">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
-            <h1>Manage Certificates &amp; Achievements</h1>
-            <a href="{{ route('admin.certificates.create') }}" class="btn btn-primary"><i class="ri-add-line"></i> New Certificate</a>
-        </div>
-        @if (session('success')) <div class="alert">{{ session('success') }}</div> @endif
-        <div class="table-wrapper">
-            <table>
-                <thead><tr><th>Title</th><th>Date</th><th>Documentation</th><th>Actions</th></tr></thead>
-                <tbody>
-                    @forelse ($certificates as $certificate)
-                        <tr>
-                            <td>{{ $certificate->title }}</td>
-                            <td>{{ $certificate->date?->format('Y-m-d') ?? '—' }}</td>
-                            <td>@if ($certificate->documentation)<a href="{{ Storage::url($certificate->documentation) }}" target="_blank" rel="noopener noreferrer">View file</a>@else — @endif</td>
-                            <td class="actions">
-                                <a href="{{ route('admin.certificates.show', $certificate) }}" class="btn btn-primary" aria-label="View">View</a>
-                                <a href="{{ route('admin.certificates.edit', $certificate) }}" class="btn btn-edit" aria-label="Edit"><i class="ri-edit-line"></i></a>
-                                <form action="{{ route('admin.certificates.destroy', $certificate) }}" method="POST" class="inline" onsubmit="return confirm('Delete this certificate?')">@csrf @method('DELETE')<button type="submit" class="btn btn-danger" aria-label="Delete"><i class="ri-delete-bin-line"></i></button></form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="4" style="text-align:center;padding:2rem;color:#666">No certificates yet.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+    <div class="admin-page">
+        <header class="admin-page__head">
+            <div>
+                <p class="admin-eyebrow">Konten</p>
+                <h1 class="admin-title">Sertifikat</h1>
+                <p class="admin-lead">Simpan sertifikat, prestasi, dan dokumentasi pendukung dalam satu tempat.</p>
+            </div>
+            <div class="admin-actions">
+                <a href="{{ route('admin.certificates.create') }}" class="admin-btn admin-btn--primary">
+                    <i class="ri-add-line" aria-hidden="true"></i>
+                    Sertifikat baru
+                </a>
+            </div>
+        </header>
+
+        @if (session('success'))
+            <div class="admin-alert" role="status">
+                <i class="ri-checkbox-circle-line" aria-hidden="true"></i>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <section class="admin-panel">
+            <div class="admin-panel__head">
+                <div>
+                    <h2 class="admin-panel__title">Daftar sertifikat</h2>
+                    <p>{{ $certificates->count() }} sertifikat tersimpan</p>
+                </div>
+            </div>
+
+            @if ($certificates->isEmpty())
+                <div class="admin-empty">
+                    <i class="ri-award-line" aria-hidden="true"></i>
+                    <strong>Belum ada sertifikat</strong>
+                    <p>Tambahkan sertifikat atau prestasi untuk memperkuat portofolio.</p>
+                    <a href="{{ route('admin.certificates.create') }}" class="admin-btn admin-btn--primary">
+                        <i class="ri-add-line" aria-hidden="true"></i>
+                        Tambah sertifikat
+                    </a>
+                </div>
+            @else
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Sertifikat</th>
+                                <th>Tanggal</th>
+                                <th>Dokumentasi</th>
+                                <th style="text-align: right;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($certificates as $certificate)
+                                <tr>
+                                    <td>
+                                        <div class="admin-table__primary">{{ $certificate->title }}</div>
+                                        @if ($certificate->description)
+                                            <div class="admin-table__meta">{{ \Illuminate\Support\Str::limit($certificate->description, 90) }}</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="admin-table__meta">{{ $certificate->date?->format('d M Y') ?? 'Belum diisi' }}</div>
+                                    </td>
+                                    <td>
+                                        @if ($certificate->documentation)
+                                            <a href="{{ Storage::url($certificate->documentation) }}" target="_blank" rel="noopener noreferrer" class="admin-file-link" style="margin-top: 0;">
+                                                <i class="ri-file-line" aria-hidden="true"></i>
+                                                Lihat file
+                                            </a>
+                                        @else
+                                            <span class="admin-table__meta">Tidak ada file</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="admin-table__actions">
+                                            <a href="{{ route('admin.certificates.show', $certificate) }}" class="admin-btn admin-btn--sm admin-btn--ghost admin-btn--icon" aria-label="Lihat {{ $certificate->title }}" title="Lihat">
+                                                <i class="ri-eye-line" aria-hidden="true"></i>
+                                            </a>
+                                            <a href="{{ route('admin.certificates.edit', $certificate) }}" class="admin-btn admin-btn--sm admin-btn--ghost admin-btn--icon" aria-label="Edit {{ $certificate->title }}" title="Edit">
+                                                <i class="ri-edit-line" aria-hidden="true"></i>
+                                            </a>
+                                            <form action="{{ route('admin.certificates.destroy', $certificate) }}" method="POST" class="admin-inline-form" data-confirm="Hapus sertifikat ini?">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="admin-btn admin-btn--sm admin-btn--danger admin-btn--icon" aria-label="Hapus {{ $certificate->title }}" title="Hapus">
+                                                    <i class="ri-delete-bin-line" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
     </div>
 @endsection

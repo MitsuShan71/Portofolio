@@ -1,17 +1,87 @@
 @extends('layouts.admin')
-@section('title', 'Edit Skill')
+
+@section('title', 'Edit keahlian')
+
 @section('content')
-<div class="container" style="max-width:480px;margin:auto;padding:2rem">
-    <h1>Edit Skill</h1>
-    <form action="{{ route('admin.skills.update', $skill) }}" method="POST" enctype="multipart/form-data">
-        @csrf @method('PUT')
-        <div><label for="name">Name</label><input id="name" name="name" value="{{ old('name', $skill->name) }}" required>@error('name')<p>{{ $message }}</p>@enderror</div>
-        <div><label for="category">Category</label><select id="category" name="category" required><option value="hard" @selected(old('category', $skill->category) === 'hard')>Hard</option><option value="soft" @selected(old('category', $skill->category) === 'soft')>Soft</option></select>@error('category')<p>{{ $message }}</p>@enderror</div>
-        <div><label for="percentage">Percentage (0–100)</label><input type="number" id="percentage" name="percentage" min="0" max="100" step="1" value="{{ old('percentage', $skill->percentage) }}" required>@error('percentage')<p>{{ $message }}</p>@enderror</div>
-        <div><label for="icon">Icon path or class</label><input id="icon" name="icon" value="{{ old('icon', $skill->icon) }}">@error('icon')<p>{{ $message }}</p>@enderror</div>
-        <div><label for="icon_image">Or upload icon image</label><input type="file" id="icon_image" name="icon_image" accept="image/*">@error('icon_image')<p>{{ $message }}</p>@enderror</div>
-        <div><label for="sort_order">Sort order</label><input type="number" id="sort_order" name="sort_order" min="0" step="1" value="{{ old('sort_order', $skill->sort_order) }}">@error('sort_order')<p>{{ $message }}</p>@enderror</div>
-        <button type="submit">Update</button> <a href="{{ route('admin.skills.index') }}">Cancel</a>
-    </form>
-</div>
+    <div class="admin-page">
+        <a href="{{ route('admin.skills.index') }}" class="admin-back">
+            <i class="ri-arrow-left-line" aria-hidden="true"></i>
+            Kembali ke keahlian
+        </a>
+
+        <header class="admin-page__head">
+            <div>
+                <p class="admin-eyebrow">Keahlian</p>
+                <h1 class="admin-title">Edit keahlian</h1>
+                <p class="admin-lead">Perbarui detail {{ $skill->name }} dan persentase yang tampil di portofolio.</p>
+            </div>
+        </header>
+
+        <section class="admin-panel admin-form-panel">
+            <form action="{{ route('admin.skills.update', $skill) }}" method="POST" enctype="multipart/form-data" class="admin-form">
+                @csrf
+                @method('PUT')
+
+                <div class="admin-form__grid">
+                    <div class="admin-field">
+                        <label for="name" class="admin-label">Nama keahlian</label>
+                        <input type="text" name="name" id="name" value="{{ old('name', $skill->name) }}" class="admin-input" required>
+                        @error('name') <span class="admin-error">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="admin-field">
+                        <label for="category" class="admin-label">Kategori</label>
+                        <select name="category" id="category" class="admin-select" required>
+                            <option value="hard" @selected(old('category', $skill->category) === 'hard')>Hard skill</option>
+                            <option value="soft" @selected(old('category', $skill->category) === 'soft')>Soft skill</option>
+                        </select>
+                        @error('category') <span class="admin-error">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="admin-form__grid">
+                    <div class="admin-field">
+                        <label for="percentage" class="admin-label">Persentase</label>
+                        <input type="number" name="percentage" id="percentage" min="0" max="100" step="1" value="{{ old('percentage', $skill->percentage) }}" class="admin-input" required>
+                        <span class="admin-hint">Nilai 0 sampai 100.</span>
+                        @error('percentage') <span class="admin-error">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="admin-field">
+                        <label for="sort_order" class="admin-label">Urutan tampil</label>
+                        <input type="number" name="sort_order" id="sort_order" min="0" step="1" value="{{ old('sort_order', $skill->sort_order) }}" class="admin-input">
+                        @error('sort_order') <span class="admin-error">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="admin-field">
+                    <label for="icon" class="admin-label">Ikon (class Remix Icon)</label>
+                    <input type="text" name="icon" id="icon" value="{{ old('icon', $skill->icon) }}" class="admin-input" placeholder="Contoh: ri-reactjs-line">
+                    <span class="admin-hint">Kosongkan jika ingin mengunggah gambar ikon.</span>
+                    @if ($skill->icon && ! str_starts_with($skill->icon, 'skills/'))
+                        <span class="admin-hint"><i class="{{ $skill->icon }}" aria-hidden="true"></i> Ikon saat ini: {{ $skill->icon }}</span>
+                    @endif
+                    @error('icon') <span class="admin-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="admin-field">
+                    <label for="icon_image" class="admin-label">Ganti gambar ikon</label>
+                    <input type="file" name="icon_image" id="icon_image" accept="image/jpeg,image/png,image/webp" class="admin-input">
+                    <span class="admin-hint">JPG, PNG, atau WebP dengan ukuran maksimal 2 MB.</span>
+                    @if ($skill->icon && str_starts_with($skill->icon, 'skills/'))
+                        <img src="{{ Storage::url($skill->icon) }}" alt="{{ $skill->name }}" class="admin-preview admin-preview--portrait" style="max-width: 5rem; max-height: 5rem; padding: 0.6rem;">
+                    @endif
+                    @error('icon_image') <span class="admin-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="admin-form__actions">
+                    <button type="submit" class="admin-btn admin-btn--primary">
+                        <i class="ri-save-line" aria-hidden="true"></i>
+                        Simpan perubahan
+                    </button>
+                    <a href="{{ route('admin.skills.index') }}" class="admin-btn admin-btn--ghost">Batal</a>
+                </div>
+            </form>
+        </section>
+    </div>
 @endsection

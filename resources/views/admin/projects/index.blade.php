@@ -1,113 +1,102 @@
 @extends('layouts.admin')
 
-@section('title', 'Manage Projects')
-
-@section('styles')
-    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
-    h1 { color: var(--color-title); margin-bottom: 1.5rem; }
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        text-decoration: none;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        font-size: 0.938rem;
-    }
-    .btn-primary { background: var(--color-first); color: var(--color-title); }
-    .btn-danger { background: #dc3545; color: #fff; }
-    .btn-edit { background: #ffc107; color: #000; }
-    .mb-3 { margin-bottom: 1.5rem; }
-    .alert {
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin-bottom: 1.5rem;
-        background: #198754;
-        color: #fff;
-    }
-    .table-wrapper {
-        border-radius: 0.5rem;
-        overflow: hidden;
-        border: 1px solid var(--color-title);
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        background: var(--color-container);
-    }
-    th, td {
-        padding: 1rem;
-        text-align: left;
-    }
-    th { color: var(--color-title); font-weight: 600; background: #1a1c26; }
-    td { color: var(--color-text); }
-    .actions { display: flex; gap: 0.5rem; }
-    .actions .btn { padding: 0.5rem 0.75rem; font-size: 0.813rem; }
-    .project-img { width: 40px; height: 28px; object-fit: cover; border-radius: 4px; }
-    form.inline { display: inline; }
-@endsection
+@section('title', 'Proyek')
 
 @section('content')
-    <div class="container">
-        <div class="mb-3" style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>Manage Projects</h1>
-            <a href="{{ route('admin.projects.create') }}" class="btn btn-primary">
-                <i class="ri-add-line"></i> New Project
-            </a>
-        </div>
+    <div class="admin-page">
+        <header class="admin-page__head">
+            <div>
+                <p class="admin-eyebrow">Konten</p>
+                <h1 class="admin-title">Proyek</h1>
+                <p class="admin-lead">Kelola karya yang tampil di portofolio. Setiap proyek membutuhkan gambar utama sebagai pratinjau.</p>
+            </div>
+            <div class="admin-actions">
+                <a href="{{ route('admin.projects.create') }}" class="admin-btn admin-btn--primary">
+                    <i class="ri-add-line" aria-hidden="true"></i>
+                    Proyek baru
+                </a>
+            </div>
+        </header>
 
         @if (session('success'))
-            <div class="alert">{{ session('success') }}</div>
+            <div class="admin-alert" role="status">
+                <i class="ri-checkbox-circle-line" aria-hidden="true"></i>
+                {{ session('success') }}
+            </div>
         @endif
 
-        <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>Image</th>
-                    <th>Title</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($projects as $project)
-                    <tr>
-                        <td>
-                            @if ($project->image)
-                                <img src="{{ Storage::url($project->image) }}" alt="" class="project-img">
-                            @else
-                                <span style="color: #666; font-size: 0.813rem;">No image</span>
-                            @endif
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.projects.show', $project) }}">{{ $project->title }}</a>
-                            @if ($project->description)
-                                <div>{{ \Illuminate\Support\Str::limit($project->description, 100) }}</div>
-                            @endif
-                        </td>
-                        <td class="actions">
-                            <a href="{{ route('admin.projects.edit', $project) }}" class="btn btn-edit">
-                                <i class="ri-edit-line"></i>
-                            </a>
-                            <form action="{{ route('admin.projects.destroy', $project) }}" method="POST" class="inline" onsubmit="return confirm('Delete this project?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="ri-delete-bin-line"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="3" style="text-align: center; padding: 2rem; color: #666;">No projects yet.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-        </div>
+        <section class="admin-panel">
+            <div class="admin-panel__head">
+                <div>
+                    <h2 class="admin-panel__title">Daftar proyek</h2>
+                    <p>{{ $projects->count() }} proyek tersimpan</p>
+                </div>
+            </div>
+
+            @if ($projects->isEmpty())
+                <div class="admin-empty">
+                    <i class="ri-folder-open-line" aria-hidden="true"></i>
+                    <strong>Belum ada proyek</strong>
+                    <p>Tambahkan karya pertama supaya muncul di bagian proyek halaman publik.</p>
+                    <a href="{{ route('admin.projects.create') }}" class="admin-btn admin-btn--primary">
+                        <i class="ri-add-line" aria-hidden="true"></i>
+                        Tambah proyek
+                    </a>
+                </div>
+            @else
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Proyek</th>
+                                <th>Deskripsi</th>
+                                <th style="text-align: right;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($projects as $project)
+                                <tr>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            @if ($project->image)
+                                                <img src="{{ Storage::url($project->image) }}" alt="" class="admin-table__thumb">
+                                            @else
+                                                <span class="admin-table__placeholder"><i class="ri-image-line" aria-hidden="true"></i></span>
+                                            @endif
+                                            <div>
+                                                <a href="{{ route('admin.projects.show', $project) }}" class="admin-table__primary">{{ $project->title }}</a>
+                                                <div class="admin-table__meta">{{ $project->technologies ?: 'Belum ada teknologi' }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="admin-table__meta" style="max-width: 30rem;">
+                                            {{ $project->description ? \Illuminate\Support\Str::limit($project->description, 110) : 'Belum ada deskripsi.' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="admin-table__actions">
+                                            <a href="{{ route('admin.projects.show', $project) }}" class="admin-btn admin-btn--sm admin-btn--ghost admin-btn--icon" aria-label="Lihat {{ $project->title }}" title="Lihat">
+                                                <i class="ri-eye-line" aria-hidden="true"></i>
+                                            </a>
+                                            <a href="{{ route('admin.projects.edit', $project) }}" class="admin-btn admin-btn--sm admin-btn--ghost admin-btn--icon" aria-label="Edit {{ $project->title }}" title="Edit">
+                                                <i class="ri-edit-line" aria-hidden="true"></i>
+                                            </a>
+                                            <form action="{{ route('admin.projects.destroy', $project) }}" method="POST" class="admin-inline-form" data-confirm="Hapus proyek ini?">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="admin-btn admin-btn--sm admin-btn--danger admin-btn--icon" aria-label="Hapus {{ $project->title }}" title="Hapus">
+                                                    <i class="ri-delete-bin-line" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
     </div>
 @endsection

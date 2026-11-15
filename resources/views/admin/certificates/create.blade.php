@@ -1,32 +1,61 @@
 @extends('layouts.admin')
 
-@section('title', 'Create Certificate')
-
-@section('styles')
-    .container { max-width: 480px; margin: 0 auto; padding: 2rem; }
-    h1 { color: var(--color-title); margin-bottom: 1.5rem; }
-    .form-group { margin-bottom: 1.5rem; }
-    label { display: block; margin-bottom: 0.5rem; color: var(--color-title); font-weight: 500; }
-    input, textarea { width: 100%; padding: 0.75rem 1rem; border-radius: 0.5rem; background: #3a3d4a; color: var(--color-title); border: none; font-family: inherit; font-size: 0.938rem; }
-    textarea { resize: vertical; min-height: 100px; }
-    input[type=file] { background: transparent; padding-left: 0; }
-    .btn { display: inline-flex; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
-    .btn-primary { background: var(--color-first); color: var(--color-title); }
-    .btn-secondary { background: #3a3d4a; color: var(--color-title); }
-    .flex { display: flex; gap: 1rem; }
-    .error { color: #dc3545; font-size: 0.813rem; margin-top: 0.25rem; }
-@endsection
+@section('title', 'Sertifikat baru')
 
 @section('content')
-    <div class="container">
-        <h1>Create Certificate or Achievement</h1>
-        <form action="{{ route('admin.certificates.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            <div class="form-group"><label for="title">Title</label><input type="text" name="title" id="title" value="{{ old('title') }}" required>@error('title')<div class="error">{{ $message }}</div>@enderror</div>
-            <div class="form-group"><label for="description">Description</label><textarea name="description" id="description">{{ old('description') }}</textarea>@error('description')<div class="error">{{ $message }}</div>@enderror</div>
-            <div class="form-group"><label for="date">Date</label><input type="date" name="date" id="date" value="{{ old('date') }}">@error('date')<div class="error">{{ $message }}</div>@enderror</div>
-            <div class="form-group"><label for="documentation">Documentation (image or PDF)</label><input type="file" name="documentation" id="documentation" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf">@error('documentation')<div class="error">{{ $message }}</div>@enderror</div>
-            <div class="flex"><button type="submit" class="btn btn-primary">Save</button><a href="{{ route('admin.certificates.index') }}" class="btn btn-secondary">Cancel</a></div>
-        </form>
+    <div class="admin-page">
+        <a href="{{ route('admin.certificates.index') }}" class="admin-back">
+            <i class="ri-arrow-left-line" aria-hidden="true"></i>
+            Kembali ke sertifikat
+        </a>
+
+        <header class="admin-page__head">
+            <div>
+                <p class="admin-eyebrow">Sertifikat</p>
+                <h1 class="admin-title">Sertifikat baru</h1>
+                <p class="admin-lead">Simpan sertifikat, prestasi, atau penghargaan beserta dokumentasinya.</p>
+            </div>
+        </header>
+
+        <section class="admin-panel admin-form-panel">
+            <form action="{{ route('admin.certificates.store') }}" method="POST" enctype="multipart/form-data" class="admin-form">
+                @csrf
+
+                <div class="admin-form__grid">
+                    <div class="admin-field">
+                        <label for="title" class="admin-label">Judul sertifikat</label>
+                        <input type="text" name="title" id="title" value="{{ old('title') }}" class="admin-input" required>
+                        @error('title') <span class="admin-error">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="admin-field">
+                        <label for="date" class="admin-label">Tanggal</label>
+                        <input type="date" name="date" id="date" value="{{ old('date') }}" class="admin-input">
+                        @error('date') <span class="admin-error">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="admin-field">
+                    <label for="description" class="admin-label">Deskripsi</label>
+                    <textarea name="description" id="description" class="admin-textarea">{{ old('description') }}</textarea>
+                    @error('description') <span class="admin-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="admin-field">
+                    <label for="documentation" class="admin-label">Dokumentasi</label>
+                    <input type="file" name="documentation" id="documentation" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf" class="admin-input">
+                    <span class="admin-hint">Gambar atau PDF, maksimal 10 MB.</span>
+                    @error('documentation') <span class="admin-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="admin-form__actions">
+                    <button type="submit" class="admin-btn admin-btn--primary">
+                        <i class="ri-save-line" aria-hidden="true"></i>
+                        Simpan sertifikat
+                    </button>
+                    <a href="{{ route('admin.certificates.index') }}" class="admin-btn admin-btn--ghost">Batal</a>
+                </div>
+            </form>
+        </section>
     </div>
 @endsection

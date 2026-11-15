@@ -1,37 +1,56 @@
 @extends('layouts.admin')
 
-@section('title', 'Feedback from ' . $feedback->name)
-
-@section('styles')
-    .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
-    .card { background: var(--color-container); border: 1px solid #3a3d4a; border-radius: 0.5rem; padding: 1.5rem; }
-    h1 { color: var(--color-title); margin-bottom: 1.5rem; }
-    .meta { margin-bottom: 1rem; line-height: 1.7; }
-    .meta strong { color: var(--color-title); }
-    .message { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
-    .actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; align-items: center; }
-    .btn { display: inline-flex; padding: 0.65rem 1rem; border: 0; border-radius: 0.5rem; text-decoration: none; cursor: pointer; font-weight: 600; }
-    .btn-secondary { background: #3a3d4a; color: var(--color-title); }
-    .btn-danger { background: #dc3545; color: #fff; }
-@endsection
+@section('title', 'Masukan dari ' . $feedback->name)
 
 @section('content')
-    <div class="container">
-        <div class="card">
-            <h1>Feedback</h1>
-            <div class="meta">
-                <div><strong>From:</strong> {{ $feedback->name }}</div>
-                <div><strong>Received:</strong> {{ $feedback->created_at->format('Y-m-d H:i') }}</div>
+    <div class="admin-page">
+        <a href="{{ route('admin.feedback.index') }}" class="admin-back">
+            <i class="ri-arrow-left-line" aria-hidden="true"></i>
+            Kembali ke kesan & pesan
+        </a>
+
+        <header class="admin-page__head">
+            <div>
+                <p class="admin-eyebrow">Kesan & pesan</p>
+                <h1 class="admin-title">Masukan dari {{ $feedback->name }}</h1>
+                <p class="admin-lead">Diterima {{ $feedback->created_at->format('d M Y, H:i') }}.</p>
             </div>
-            <div class="message">{{ $feedback->message }}</div>
-            <div class="actions">
-                <a href="{{ route('admin.feedback.index') }}" class="btn btn-secondary">Back to Feedback</a>
-                <form action="{{ route('admin.feedback.destroy', $feedback) }}" method="POST" onsubmit="return confirm('Delete this feedback?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
+        </header>
+
+        <article class="admin-detail-card">
+            <div class="admin-detail-card__head">
+                <h2 class="admin-panel__title">Detail masukan</h2>
+                <p>Kesan dan pesan yang dikirim pengunjung.</p>
             </div>
-        </div>
+            <div class="admin-detail-card__body">
+                <div class="admin-meta-grid">
+                    <div class="admin-meta-item">
+                        <span>Nama</span>
+                        <strong>{{ $feedback->name }}</strong>
+                    </div>
+                    <div class="admin-meta-item">
+                        <span>Diterima</span>
+                        <strong>{{ $feedback->created_at->format('d M Y, H:i') }}</strong>
+                    </div>
+                </div>
+
+                <div class="admin-message-box">{{ $feedback->message }}</div>
+
+                <div class="admin-detail__actions">
+                    <a href="{{ route('admin.feedback.index') }}" class="admin-btn admin-btn--ghost">
+                        <i class="ri-arrow-left-line" aria-hidden="true"></i>
+                        Kembali
+                    </a>
+                    <form action="{{ route('admin.feedback.destroy', $feedback) }}" method="POST" class="admin-inline-form" data-confirm="Hapus masukan ini?">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="admin-btn admin-btn--danger">
+                            <i class="ri-delete-bin-line" aria-hidden="true"></i>
+                            Hapus masukan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </article>
     </div>
 @endsection

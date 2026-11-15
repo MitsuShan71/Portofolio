@@ -1,139 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
+    <title>Masuk Admin — Portofolio</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.0.0/fonts/remixicon.css" rel="stylesheet">
-    <style>
-        :root {
-            --color-body: #2b2e3b;
-            --color-container: #21232c;
-            --color-title: #f1f2f3;
-            --color-text: #9fa1ad;
-            --color-first: #50C878;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--color-body);
-            color: var(--color-text);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .login-card {
-            background: var(--color-container);
-            padding: 2.5rem;
-            border-radius: 1rem;
-            width: 100%;
-            max-width: 400px;
-        }
-        h1 {
-            color: var(--color-title);
-            text-align: center;
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
-        }
-        p.subtitle {
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 0.875rem;
-        }
-        .form-group { margin-bottom: 1.25rem; }
-        label { display: block; margin-bottom: 0.5rem; color: var(--color-title); font-weight: 500; font-size: 0.875rem; }
-        input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            background: #fff;
-            color: #333;
-            border: none;
-            outline: none;
-            font-family: inherit;
-            font-size: 0.938rem;
-        }
-        input:focus { box-shadow: 0 0 0 2px var(--color-first); }
-        .password-wrapper { position: relative; }
-        .password-wrapper input { padding-right: 2.5rem; }
-        .toggle-password {
-            position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--color-text);
-            cursor: pointer;
-            font-size: 1.25rem;
-            padding: 0;
-            line-height: 1;
-        }
-        .btn {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            background: var(--color-first);
-            color: var(--color-title);
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: transform 0.2s;
-        }
-        .btn:hover { transform: translateY(-2px); }
-        .error { color: #dc3545; font-size: 0.813rem; margin-top: 0.25rem; text-align: center; }
-        .logo { text-align: center; font-size: 2rem; color: var(--color-title); margin-bottom: 0.5rem; }
-        .logo span { color: var(--color-title); }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-        <div class="logo">Portfolio</div>
-        <h1>Admin Login</h1>
-        <p class="subtitle">Sign in to manage your portfolio</p>
-
-        @if ($errors->has('login'))
-            <div class="error">{{ $errors->first('login') }}</div>
-        @endif
-
-        <form action="{{ route('admin.login.submit') }}" method="POST">
-            @csrf
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" name="username" id="username" value="{{ old('username') }}" required autofocus>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <div class="password-wrapper">
-                    <input type="password" name="password" id="password" required>
-                    <button type="button" class="toggle-password" onclick="togglePassword()" tabindex="-1">
-                        <i class="ri-eye-line" id="password-icon"></i>
-                    </button>
-                </div>
-            </div>
-            <button type="submit" class="btn"><i class="ri-login-circle-line"></i> Sign In</button>
-        </form>
-    </div>
-
     <script>
-        function togglePassword() {
-            const input = document.getElementById('password');
-            const icon = document.getElementById('password-icon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'ri-eye-off-line';
-            } else {
-                input.type = 'password';
-                icon.className = 'ri-eye-line';
-            }
-        }
+        (() => {
+            const theme = localStorage.getItem('portfolio-theme');
+            if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+            document.documentElement.classList.add('js');
+        })();
     </script>
+    @vite(['resources/css/admin.css', 'resources/js/admin.js'])
+</head>
+<body class="admin-body admin-login-body">
+    <main class="admin-login">
+        <section class="admin-login__card" aria-labelledby="admin-login-title">
+            <a href="{{ route('home') }}" class="admin-login__back">Kembali ke portofolio</a>
+            <h1 id="admin-login-title">Masuk admin</h1>
+            <p class="admin-login__intro">Masuk untuk mengelola portofolio.</p>
+
+            @if ($errors->any())
+                <div class="admin-alert admin-alert--danger" role="alert" style="margin-top: 1.1rem;">
+                    <i class="ri-error-warning-line" aria-hidden="true"></i>
+                    <div>
+                        @if ($errors->has('login'))
+                            {{ $errors->first('login') }}
+                        @else
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <form action="{{ route('admin.login.submit') }}" method="POST" class="admin-login__form">
+                @csrf
+                <div class="admin-field">
+                    <label for="username" class="admin-label">Username</label>
+                    <input type="text" name="username" id="username" value="{{ old('username') }}" class="admin-input" required autofocus autocomplete="username">
+                    @error('username')
+                        <span class="admin-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="admin-field">
+                    <label for="password" class="admin-label">Kata sandi</label>
+                    <div class="admin-password">
+                        <input type="password" name="password" id="password" class="admin-input" required autocomplete="current-password">
+                        <button type="button" class="admin-password__toggle" data-password-toggle="password" aria-label="Tampilkan kata sandi">
+                            <i class="ri-eye-line" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    @error('password')
+                        <span class="admin-error">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <button type="submit" class="admin-btn admin-btn--primary admin-login__submit">
+                    Masuk
+                </button>
+            </form>
+        </section>
+    </main>
 </body>
 </html>

@@ -1,35 +1,68 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Certificate')
-
-@section('styles')
-    .container { max-width: 480px; margin: 0 auto; padding: 2rem; }
-    h1 { color: var(--color-title); margin-bottom: 1.5rem; }
-    .form-group { margin-bottom: 1.5rem; }
-    label { display: block; margin-bottom: 0.5rem; color: var(--color-title); font-weight: 500; }
-    input, textarea { width: 100%; padding: 0.75rem 1rem; border-radius: 0.5rem; background: #3a3d4a; color: var(--color-title); border: none; font-family: inherit; font-size: 0.938rem; }
-    textarea { resize: vertical; min-height: 100px; }
-    input[type=file] { background: transparent; padding-left: 0; }
-    .btn { display: inline-flex; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 0.5rem; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
-    .btn-primary { background: var(--color-first); color: var(--color-title); }
-    .btn-secondary { background: #3a3d4a; color: var(--color-title); }
-    .flex { display: flex; gap: 1rem; }
-    .error { color: #dc3545; font-size: 0.813rem; margin-top: 0.25rem; }
-@endsection
+@section('title', 'Edit sertifikat')
 
 @section('content')
-    <div class="container">
-        <h1>Edit Certificate or Achievement</h1>
-        <form action="{{ route('admin.certificates.update', $certificate) }}" method="POST" enctype="multipart/form-data">
-            @csrf @method('PUT')
-            <div class="form-group"><label for="title">Title</label><input type="text" name="title" id="title" value="{{ old('title', $certificate->title) }}" required>@error('title')<div class="error">{{ $message }}</div>@enderror</div>
-            <div class="form-group"><label for="description">Description</label><textarea name="description" id="description">{{ old('description', $certificate->description) }}</textarea>@error('description')<div class="error">{{ $message }}</div>@enderror</div>
-            <div class="form-group"><label for="date">Date</label><input type="date" name="date" id="date" value="{{ old('date', $certificate->date?->format('Y-m-d')) }}">@error('date')<div class="error">{{ $message }}</div>@enderror</div>
-            <div class="form-group"><label for="documentation">Documentation (image or PDF)</label><input type="file" name="documentation" id="documentation" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf">
-                @if ($certificate->documentation)<p>Current file: <a href="{{ Storage::url($certificate->documentation) }}" target="_blank" rel="noopener noreferrer">View documentation</a></p>@endif
-                @error('documentation')<div class="error">{{ $message }}</div>@enderror
+    <div class="admin-page">
+        <a href="{{ route('admin.certificates.index') }}" class="admin-back">
+            <i class="ri-arrow-left-line" aria-hidden="true"></i>
+            Kembali ke sertifikat
+        </a>
+
+        <header class="admin-page__head">
+            <div>
+                <p class="admin-eyebrow">Sertifikat</p>
+                <h1 class="admin-title">Edit sertifikat</h1>
+                <p class="admin-lead">Perbarui detail {{ $certificate->title }} atau ganti dokumentasinya.</p>
             </div>
-            <div class="flex"><button type="submit" class="btn btn-primary">Update</button><a href="{{ route('admin.certificates.index') }}" class="btn btn-secondary">Cancel</a></div>
-        </form>
+        </header>
+
+        <section class="admin-panel admin-form-panel">
+            <form action="{{ route('admin.certificates.update', $certificate) }}" method="POST" enctype="multipart/form-data" class="admin-form">
+                @csrf
+                @method('PUT')
+
+                <div class="admin-form__grid">
+                    <div class="admin-field">
+                        <label for="title" class="admin-label">Judul sertifikat</label>
+                        <input type="text" name="title" id="title" value="{{ old('title', $certificate->title) }}" class="admin-input" required>
+                        @error('title') <span class="admin-error">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="admin-field">
+                        <label for="date" class="admin-label">Tanggal</label>
+                        <input type="date" name="date" id="date" value="{{ old('date', $certificate->date?->format('Y-m-d')) }}" class="admin-input">
+                        @error('date') <span class="admin-error">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="admin-field">
+                    <label for="description" class="admin-label">Deskripsi</label>
+                    <textarea name="description" id="description" class="admin-textarea">{{ old('description', $certificate->description) }}</textarea>
+                    @error('description') <span class="admin-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="admin-field">
+                    <label for="documentation" class="admin-label">Dokumentasi</label>
+                    <input type="file" name="documentation" id="documentation" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf" class="admin-input">
+                    <span class="admin-hint">Biarkan kosong jika tidak ingin mengganti dokumentasi. Maksimal 10 MB.</span>
+                    @if ($certificate->documentation)
+                        <a href="{{ Storage::url($certificate->documentation) }}" target="_blank" rel="noopener noreferrer" class="admin-file-link">
+                            <i class="ri-file-line" aria-hidden="true"></i>
+                            Lihat dokumentasi saat ini
+                        </a>
+                    @endif
+                    @error('documentation') <span class="admin-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="admin-form__actions">
+                    <button type="submit" class="admin-btn admin-btn--primary">
+                        <i class="ri-save-line" aria-hidden="true"></i>
+                        Simpan perubahan
+                    </button>
+                    <a href="{{ route('admin.certificates.index') }}" class="admin-btn admin-btn--ghost">Batal</a>
+                </div>
+            </form>
+        </section>
     </div>
 @endsection
