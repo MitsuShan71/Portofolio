@@ -49,6 +49,7 @@
                                 <tr>
                                     <td>
                                         <a href="{{ route('admin.feedback.show', $item) }}" class="admin-table__primary">{{ $item->name }}</a>
+                                        <span class="admin-badge">{{ $item->kind === 'testimonial' ? 'Testimoni' : 'Buku tamu' }}</span>
                                     </td>
                                     <td>
                                         <div class="admin-table__meta" style="max-width: 30rem;">

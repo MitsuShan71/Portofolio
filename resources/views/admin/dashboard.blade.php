@@ -17,7 +17,7 @@
                 <span class="admin-overview__count">{{ $counts['projects'] }}</span>
             </a>
             <a href="{{ route('admin.articles.index') }}" class="admin-overview__link">
-                <span>Artikel</span>
+                <span>Blog</span>
                 <span class="admin-overview__count">{{ $counts['articles'] }}</span>
             </a>
             <a href="{{ route('admin.experiences.index') }}" class="admin-overview__link">
@@ -32,9 +32,9 @@
                 <span>Sertifikat</span>
                 <span class="admin-overview__count">{{ $counts['certificates'] }}</span>
             </a>
-            <a href="{{ route('admin.messages.index') }}" class="admin-overview__link">
-                <span>Pesan</span>
-                <span class="admin-overview__count">{{ $counts['messages'] }}</span>
+            <a href="{{ route('admin.testimonials.index') }}" class="admin-overview__link">
+                <span>Testimoni</span>
+                <span class="admin-overview__count">{{ $counts['testimonials'] }}</span>
             </a>
         </section>
     </div>

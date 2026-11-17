@@ -29,51 +29,36 @@
                 </div>
 
                 <div class="admin-field">
-                    <label for="description" class="admin-label">Deskripsi singkat</label>
-                    <textarea name="description" id="description" class="admin-textarea">{{ old('description', $project->description) }}</textarea>
-                    @error('description') <span class="admin-error">{{ $message }}</span> @enderror
-                </div>
-
-                @foreach ([
-                    'problem_solved' => 'Masalah yang diselesaikan',
-                    'objective' => 'Tujuan proyek',
-                    'technologies' => 'Teknologi yang digunakan',
-                    'role' => 'Peran',
-                    'features' => 'Fitur utama',
-                    'process_documentation' => 'Dokumentasi proses',
-                    'user_feedback' => 'Umpan balik pengguna',
-                    'details' => 'Detail tambahan',
-                ] as $field => $label)
-                    <div class="admin-field">
-                        <label for="{{ $field }}" class="admin-label">{{ $label }}</label>
-                        <textarea name="{{ $field }}" id="{{ $field }}" class="admin-textarea">{{ old($field, $project->{$field}) }}</textarea>
-                        @error($field) <span class="admin-error">{{ $message }}</span> @enderror
-                    </div>
-                @endforeach
-
-                <div class="admin-form__grid">
-                    <div class="admin-field">
-                        <label for="demo_link" class="admin-label">Tautan demo</label>
-                        <input type="url" name="demo_link" id="demo_link" value="{{ old('demo_link', $project->demo_link) }}" class="admin-input" placeholder="https://...">
-                        @error('demo_link') <span class="admin-error">{{ $message }}</span> @enderror
-                    </div>
-                    <div class="admin-field">
-                        <label for="github_link" class="admin-label">Tautan GitHub</label>
-                        <input type="url" name="github_link" id="github_link" value="{{ old('github_link', $project->github_link) }}" class="admin-input" placeholder="https://...">
-                        @error('github_link') <span class="admin-error">{{ $message }}</span> @enderror
-                    </div>
+                    <label for="category" class="admin-label">Kategori proyek</label>
+                    <input type="text" name="category" id="category" value="{{ old('category', $project->category) }}" class="admin-input" placeholder="UI/UX, Website, Infografis">
+                    <span class="admin-hint">Kategori ini akan menjadi pilihan filter di portofolio.</span>
+                    @error('category') <span class="admin-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="admin-field">
-                    <label for="link" class="admin-label">Tautan tambahan</label>
-                    <input type="url" name="link" id="link" value="{{ old('link', $project->link) }}" class="admin-input" placeholder="https://...">
-                    @error('link') <span class="admin-error">{{ $message }}</span> @enderror
+                    <label for="role" class="admin-label">Peran</label>
+                    <input type="text" name="role" id="role" value="{{ old('role', $project->role) }}" class="admin-input" placeholder="UI/UX Designer">
+                    @error('role') <span class="admin-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="admin-field">
+                    <label for="technologies" class="admin-label">Teknologi</label>
+                    <input type="text" name="technologies" id="technologies" value="{{ old('technologies', $project->technologies) }}" class="admin-input" placeholder="Laravel, MySQL">
+                    <span class="admin-hint">Pisahkan dengan koma. Teknologi ini juga digunakan untuk filter proyek.</span>
+                    @error('technologies') <span class="admin-error">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="admin-field">
+                    <label for="demo_link" class="admin-label">Tautan</label>
+                    <input type="url" name="demo_link" id="demo_link" value="{{ old('demo_link', $project->demo_link ?: $project->link ?: $project->github_link) }}" class="admin-input" placeholder="https://...">
+                    <span class="admin-hint">Bisa tautan demo atau GitHub.</span>
+                    @error('demo_link') <span class="admin-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="admin-field">
                     <label for="image" class="admin-label">Gambar utama</label>
-                    <input type="file" name="image" id="image" accept="image/jpeg,image/png,image/webp" class="admin-input" @if (!$project->image) required @endif>
-                    <span class="admin-hint">{{ $project->image ? 'Biarkan kosong jika tidak ingin mengganti gambar.' : 'Gambar wajib diunggah untuk proyek baru.' }} Maksimal 2 MB.</span>
+                    <input type="file" name="image" id="image" accept="image/jpeg,image/png,image/webp" class="admin-input">
+                    <span class="admin-hint">{{ $project->image ? 'Biarkan kosong jika tidak ingin mengganti gambar.' : 'Gambar opsional.' }} Maksimal 2 MB.</span>
                     @if ($project->image)
                         <img src="{{ Storage::url($project->image) }}" alt="{{ $project->title }}" class="admin-preview">
                     @endif

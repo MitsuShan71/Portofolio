@@ -65,7 +65,6 @@
                                             @endif
                                             <div>
                                                 <a href="{{ route('admin.projects.show', $project) }}" class="admin-table__primary">{{ $project->title }}</a>
-                                                <div class="admin-table__meta">{{ $project->technologies ?: 'Belum ada teknologi' }}</div>
                                             </div>
                                         </div>
                                     </td>

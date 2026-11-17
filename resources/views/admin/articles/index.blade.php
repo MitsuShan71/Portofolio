@@ -1,19 +1,19 @@
 @extends('layouts.admin')
 
-@section('title', 'Artikel')
+@section('title', 'Blog')
 
 @section('content')
     <div class="admin-page">
         <header class="admin-page__head">
             <div>
                 <p class="admin-eyebrow">Konten</p>
-                <h1 class="admin-title">Artikel</h1>
-                <p class="admin-lead">Tulis catatan ngoding dan cerita proses desain. Artikel berstatus draf tidak akan tampil di halaman publik.</p>
+                <h1 class="admin-title">Blog</h1>
+        <p class="admin-lead">Tulis catatan ngoding dan cerita proses desain. Blog berstatus draf tidak akan tampil di halaman publik.</p>
             </div>
             <div class="admin-actions">
                 <a href="{{ route('admin.articles.create') }}" class="admin-btn admin-btn--primary">
                     <i class="ri-quill-pen-line" aria-hidden="true"></i>
-                    Tulis artikel
+                    Tulis blog
                 </a>
             </div>
         </header>
@@ -28,19 +28,19 @@
         <section class="admin-panel">
             <div class="admin-panel__head">
                 <div>
-                    <h2 class="admin-panel__title">Daftar artikel</h2>
-                    <p>{{ $articles->total() }} artikel tersimpan</p>
+                <h2 class="admin-panel__title">Daftar blog</h2>
+                <p>{{ $articles->total() }} blog tersimpan</p>
                 </div>
             </div>
 
             @if ($articles->isEmpty())
                 <div class="admin-empty">
                     <i class="ri-article-line" aria-hidden="true"></i>
-                    <strong>Belum ada artikel</strong>
+                <strong>Belum ada blog</strong>
                     <p>Mulai tulis catatan pertama untuk mengisi blog pengembang.</p>
                     <a href="{{ route('admin.articles.create') }}" class="admin-btn admin-btn--primary">
                         <i class="ri-quill-pen-line" aria-hidden="true"></i>
-                        Tulis artikel
+                    Tulis blog
                     </a>
                 </div>
             @else
@@ -48,7 +48,7 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>Artikel</th>
+                                <th>Blog</th>
                                 <th>Status</th>
                                 <th>Publikasi</th>
                                 <th style="text-align: right;">Aksi</th>
@@ -78,7 +78,7 @@
                                     </td>
                                     <td>
                                         <div class="admin-table__meta">
-                                            {{ $article->published_at?->format('d M Y, H:i') ?? 'Belum dipublikasikan' }}
+                                            {{ $article->published_at?->format('d M Y') ?? 'Belum dipublikasikan' }}
                                         </div>
                                     </td>
                                     <td>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Certificate;
 use App\Models\Experience;
+use App\Models\Feedback;
 use App\Models\PortfolioProfile;
 use App\Models\Project;
 use App\Models\Skill;
@@ -38,7 +39,8 @@ class HomeController extends Controller
         $certificates = Certificate::orderByDesc('date')->orderByDesc('id')->get();
         $experiences = Experience::orderByDesc('start_date')->orderByDesc('id')->get()->groupBy('category');
         $experiences->put('plk', $experiences->get('plk', collect())->sortBy('start_date')->values());
+        $feedback = Feedback::where('kind', 'testimonial')->latest()->take(6)->get();
 
-        return view('welcome', compact('profile', 'projects', 'skills', 'certificates', 'experiences', 'articles'));
+        return view('welcome', compact('profile', 'projects', 'skills', 'certificates', 'experiences', 'articles', 'feedback'));
     }
 }

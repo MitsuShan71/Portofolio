@@ -45,9 +45,9 @@
             <form action="{{ route('admin.login.submit') }}" method="POST" class="admin-login__form">
                 @csrf
                 <div class="admin-field">
-                    <label for="username" class="admin-label">Username</label>
-                    <input type="text" name="username" id="username" value="{{ old('username') }}" class="admin-input" required autofocus autocomplete="username">
-                    @error('username')
+                    <label for="email" class="admin-label">Email</label>
+                    <input type="email" name="email" id="email" value="{{ old('email') }}" class="admin-input" required autofocus autocomplete="email">
+                    @error('email')
                         <span class="admin-error">{{ $message }}</span>
                     @enderror
                 </div>

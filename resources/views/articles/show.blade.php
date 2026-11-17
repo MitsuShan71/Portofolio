@@ -1,17 +1,6 @@
 @php
     $avatar = $profile?->profile_image ? Storage::url($profile->profile_image) : asset('profile.jpg');
     $competency = trim(explode('(', $profile?->competency ?? '')[0] ?? '');
-    $name = trim($profile?->full_name ?? 'Portofolio');
-    $words = preg_split('/\s+/', $name) ?: [$name];
-    $initials = collect($words)
-        ->map(fn ($part) => Str::upper(Str::substr($part, 0, 1)))
-        ->take(2)
-        ->implode('') ?: 'P';
-    $brandWords = $words;
-    if (count($brandWords) > 1) {
-        array_pop($brandWords);
-    }
-    $brandName = implode(' ', $brandWords) ?: $name;
 @endphp
 <!doctype html>
 <html lang="id">
@@ -43,18 +32,17 @@
 
     <header class="article-header">
         <div class="container article-header__inner">
-            <a href="{{ route('home') }}" class="brand" aria-label="{{ $profile?->full_name ?? 'Portofolio' }} — Beranda">
-                <span class="brand__mark" aria-hidden="true">{{ $initials }}</span>
-                <span class="brand__text">{{ $brandName }}<span>.</span></span>
-            </a>
+            <span class="brand is-static" aria-label="Portofolio — Beranda" aria-disabled="true" tabindex="-1">
+                <span class="brand__text">Portofolio</span>
+            </span>
 
             <div class="article-header__actions">
                 <button type="button" class="icon-btn" id="theme-toggle" aria-label="Ganti tema" title="Ganti tema">
                     <i class="ri-sun-line" aria-hidden="true"></i>
                 </button>
-                <a href="{{ route('home') }}#articles" class="btn btn--ghost btn--sm" aria-label="Semua artikel">
+                <a href="{{ route('home') }}#blog" class="btn btn--ghost btn--sm" aria-label="Semua blog">
                     <i class="ri-arrow-left-line" aria-hidden="true"></i>
-                    <span>Semua artikel</span>
+                    <span>Semua blog</span>
                 </a>
             </div>
         </div>
@@ -62,9 +50,9 @@
 
     <main id="main" class="article-main">
         <div class="container article-container">
-            <a href="{{ route('home') }}#articles" class="article-back">
+            <a href="{{ route('home') }}#blog" class="article-back">
                 <i class="ri-arrow-left-line" aria-hidden="true"></i>
-                Kembali ke artikel
+                Kembali ke blog
             </a>
 
             <header class="article-hero" data-reveal>
@@ -95,8 +83,8 @@
             <footer class="article-footer" data-reveal>
                 <p>Terima kasih sudah membaca.</p>
                 <div>
-                    <a href="{{ route('home') }}#articles" class="btn btn--ghost btn--sm">
-                        <i class="ri-arrow-left-line" aria-hidden="true"></i> Artikel lainnya
+                    <a href="{{ route('home') }}#blog" class="btn btn--ghost btn--sm">
+                        <i class="ri-arrow-left-line" aria-hidden="true"></i> Blog lainnya
                     </a>
                     <a href="{{ route('home') }}#contact" class="btn btn--primary btn--sm">
                         Hubungi saya <i class="ri-send-plane-line" aria-hidden="true"></i>

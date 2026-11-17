@@ -18,7 +18,7 @@
         </header>
 
         <section class="admin-panel admin-form-panel">
-            <form action="{{ route('admin.skills.update', $skill) }}" method="POST" enctype="multipart/form-data" class="admin-form">
+            <form action="{{ route('admin.skills.update', $skill) }}" method="POST" class="admin-form">
                 @csrf
                 @method('PUT')
 
@@ -52,26 +52,6 @@
                         <input type="number" name="sort_order" id="sort_order" min="0" step="1" value="{{ old('sort_order', $skill->sort_order) }}" class="admin-input">
                         @error('sort_order') <span class="admin-error">{{ $message }}</span> @enderror
                     </div>
-                </div>
-
-                <div class="admin-field">
-                    <label for="icon" class="admin-label">Ikon (class Remix Icon)</label>
-                    <input type="text" name="icon" id="icon" value="{{ old('icon', $skill->icon) }}" class="admin-input" placeholder="Contoh: ri-reactjs-line">
-                    <span class="admin-hint">Kosongkan jika ingin mengunggah gambar ikon.</span>
-                    @if ($skill->icon && ! str_starts_with($skill->icon, 'skills/'))
-                        <span class="admin-hint"><i class="{{ $skill->icon }}" aria-hidden="true"></i> Ikon saat ini: {{ $skill->icon }}</span>
-                    @endif
-                    @error('icon') <span class="admin-error">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="admin-field">
-                    <label for="icon_image" class="admin-label">Ganti gambar ikon</label>
-                    <input type="file" name="icon_image" id="icon_image" accept="image/jpeg,image/png,image/webp" class="admin-input">
-                    <span class="admin-hint">JPG, PNG, atau WebP dengan ukuran maksimal 2 MB.</span>
-                    @if ($skill->icon && str_starts_with($skill->icon, 'skills/'))
-                        <img src="{{ Storage::url($skill->icon) }}" alt="{{ $skill->name }}" class="admin-preview admin-preview--portrait" style="max-width: 5rem; max-height: 5rem; padding: 0.6rem;">
-                    @endif
-                    @error('icon_image') <span class="admin-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="admin-form__actions">

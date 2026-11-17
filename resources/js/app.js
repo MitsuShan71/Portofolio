@@ -96,7 +96,7 @@ function transitionTheme(theme, trigger) {
         themeTransitionTimeout = window.setTimeout(() => {
             document.documentElement.classList.remove('theme-transition');
             themeTransitioning = false;
-        }, 550);
+        }, 760);
 
         return;
     }
@@ -123,7 +123,7 @@ function transitionTheme(theme, trigger) {
                     ],
                 },
                 {
-                    duration: 620,
+                    duration: 720,
                     easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
                     fill: 'forwards',
                     pseudoElement: '::view-transition-new(root)',
@@ -222,80 +222,57 @@ if (prefersReducedMotion || !('IntersectionObserver' in window)) {
     revealTargets.forEach((target) => revealObserver.observe(target));
 }
 
-function getCsrfToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    if (meta) return meta.getAttribute('content');
+const projectGrid = document.querySelector('[data-project-grid]');
 
-    const input = document.querySelector('input[name="_token"]');
-    return input ? input.value : '';
-}
+if (projectGrid) {
+    const projectCards = Array.from(projectGrid.querySelectorAll('[data-project-card]'));
+    const projectSearch = document.querySelector('[data-project-search]');
+    const projectFilters = Array.from(document.querySelectorAll('[data-project-filter]'));
+    const projectStatus = document.querySelector('[data-project-status]');
+    const projectEmpty = document.querySelector('[data-project-empty]');
+    let activeProjectFilter = 'all';
 
-const contactForm = document.getElementById('contact-form');
-const contactMessage = document.getElementById('contact-message');
+    function updateProjectResults() {
+        const query = projectSearch?.value.trim().toLocaleLowerCase() ?? '';
+        let visibleCount = 0;
 
-if (contactForm && contactMessage) {
-    contactForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
+        projectCards.forEach((card) => {
+            const searchText = card.dataset.projectSearchText ?? '';
+            const category = card.dataset.projectCategory ?? '';
+            const matchesSearch = searchText.includes(query);
+            const matchesFilter = activeProjectFilter === 'all' || category === activeProjectFilter;
+            const isVisible = matchesSearch && matchesFilter;
 
-        const submitButton = contactForm.querySelector('[type="submit"]');
-        const originalMarkup = submitButton?.innerHTML;
+            card.hidden = !isVisible;
+            if (isVisible) visibleCount += 1;
+        });
 
-        contactMessage.textContent = '';
-        contactMessage.className = 'form__status';
-
-        if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.textContent = 'Mengirim...';
+        if (projectStatus) {
+            projectStatus.textContent = `Menampilkan ${visibleCount} dari ${projectCards.length} proyek`;
         }
 
-        try {
-            const response = await fetch(contactForm.action, {
-                method: contactForm.method || 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                },
-                body: new FormData(contactForm),
+        if (projectEmpty) {
+            projectEmpty.hidden = visibleCount > 0;
+        }
+    }
+
+    projectSearch?.addEventListener('input', updateProjectResults);
+
+    projectFilters.forEach((button) => {
+        button.addEventListener('click', () => {
+            activeProjectFilter = button.dataset.projectFilter ?? 'all';
+
+            projectFilters.forEach((filter) => {
+                const isActive = filter === button;
+                filter.classList.toggle('is-active', isActive);
+                filter.setAttribute('aria-pressed', String(isActive));
             });
 
-            let data = {};
-
-            try {
-                data = await response.json();
-            } catch {
-                data = {};
-            }
-
-            if (response.status === 503) {
-                contactMessage.textContent = data.message || 'Pesan tersimpan, tetapi email belum terkirim.';
-                contactMessage.classList.add('is-warning');
-                contactForm.reset();
-                return;
-            }
-
-            if (!response.ok) {
-                if (response.status === 422 && data.errors) {
-                    const firstError = Object.values(data.errors).flat()[0];
-                    throw new Error(firstError || 'Periksa kembali isian Anda.');
-                }
-
-                throw new Error(data.message || 'Pesan gagal dikirim. Silakan coba lagi.');
-            }
-
-            contactMessage.textContent = data.message || 'Pesan berhasil dikirim. Terima kasih!';
-            contactMessage.classList.add('is-success');
-            contactForm.reset();
-        } catch (error) {
-            contactMessage.textContent = error.message || 'Terjadi kesalahan. Silakan coba lagi.';
-            contactMessage.classList.add('is-error');
-        } finally {
-            if (submitButton) {
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalMarkup;
-            }
-        }
+            updateProjectResults();
+        });
     });
+
+    updateProjectResults();
 }
 
 document.querySelectorAll('[data-open-project]').forEach((button) => {

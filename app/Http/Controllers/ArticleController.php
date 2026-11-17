@@ -27,13 +27,13 @@ class ArticleController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'body' => ['required', 'string'],
-            'published_at' => ['nullable', 'date'],
+            'published_at' => ['nullable', 'date_format:Y-m-d'],
         ]);
         $validated['slug'] = $this->uniqueSlug($validated['title']);
 
         Article::create($validated);
 
-        return redirect()->route('admin.articles.index')->with('success', 'Artikel berhasil dibuat.');
+        return redirect()->route('admin.articles.index')->with('success', 'Blog berhasil dibuat.');
     }
 
     public function edit(Article $article)
@@ -47,7 +47,7 @@ class ArticleController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:1000'],
             'body' => ['required', 'string'],
-            'published_at' => ['nullable', 'date'],
+            'published_at' => ['nullable', 'date_format:Y-m-d'],
         ]);
         if ($article->title !== $validated['title']) {
             $validated['slug'] = $this->uniqueSlug($validated['title'], $article->id);
@@ -55,14 +55,14 @@ class ArticleController extends Controller
 
         $article->update($validated);
 
-        return redirect()->route('admin.articles.index')->with('success', 'Artikel berhasil diperbarui.');
+        return redirect()->route('admin.articles.index')->with('success', 'Blog berhasil diperbarui.');
     }
 
     public function destroy(Article $article)
     {
         $article->delete();
 
-        return redirect()->route('admin.articles.index')->with('success', 'Artikel berhasil dihapus.');
+        return redirect()->route('admin.articles.index')->with('success', 'Blog berhasil dihapus.');
     }
 
     public function publicShow(Article $article)

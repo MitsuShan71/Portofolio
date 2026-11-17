@@ -46,7 +46,7 @@
                     <span>Proyek</span>
                 </a>
                 <a href="{{ route('admin.articles.index') }}" class="admin-nav__link {{ request()->routeIs('admin.articles.*') ? 'is-active' : '' }}" @if (request()->routeIs('admin.articles.*')) aria-current="page" @endif>
-                    <span>Artikel</span>
+                    <span>Blog</span>
                 </a>
                 <a href="{{ route('admin.experiences.index') }}" class="admin-nav__link {{ request()->routeIs('admin.experiences.*') ? 'is-active' : '' }}" @if (request()->routeIs('admin.experiences.*')) aria-current="page" @endif>
                     <span>Pengalaman</span>
@@ -59,8 +59,8 @@
                 </a>
 
                 <p class="admin-nav__label">Lainnya</p>
-                <a href="{{ route('admin.messages.index') }}" class="admin-nav__link {{ request()->routeIs('admin.messages.*') ? 'is-active' : '' }}" @if (request()->routeIs('admin.messages.*')) aria-current="page" @endif>
-                    <span>Pesan kontak</span>
+                <a href="{{ route('admin.testimonials.index') }}" class="admin-nav__link {{ request()->routeIs('admin.testimonials.*') ? 'is-active' : '' }}" @if (request()->routeIs('admin.testimonials.*')) aria-current="page" @endif>
+                    <span>Testimoni</span>
                 </a>
                 <a href="{{ route('admin.feedback.index') }}" class="admin-nav__link {{ request()->routeIs('admin.feedback.*') ? 'is-active' : '' }}" @if (request()->routeIs('admin.feedback.*')) aria-current="page" @endif>
                     <span>Kesan & pesan</span>

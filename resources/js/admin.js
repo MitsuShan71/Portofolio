@@ -78,7 +78,7 @@ function transitionTheme(theme, trigger) {
         fallbackTimeout = window.setTimeout(() => {
             root.classList.remove('theme-transition');
             themeTransitioning = false;
-        }, 520);
+        }, 760);
 
         return;
     }
@@ -105,7 +105,7 @@ function transitionTheme(theme, trigger) {
                     ],
                 },
                 {
-                    duration: 620,
+                    duration: 720,
                     easing: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
                     fill: 'forwards',
                     pseudoElement: '::view-transition-new(root)',

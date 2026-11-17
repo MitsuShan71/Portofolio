@@ -3,11 +3,9 @@
 use App\Http\Controllers\ArticleController as AdminArticleController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CertificateController;
-use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SkillController;
@@ -16,7 +14,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 Route::get('/articles/{article:slug}', [AdminArticleController::class, 'publicShow'])->name('articles.show');
 
-Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -33,7 +30,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('articles', AdminArticleController::class)->except(['show']);
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::resource('messages', MessageController::class)->only(['index', 'show', 'destroy']);
+        Route::get('/testimonials', [FeedbackController::class, 'testimonials'])->name('testimonials.index');
         Route::resource('feedback', FeedbackController::class)->only(['index', 'show', 'destroy']);
     });
 });

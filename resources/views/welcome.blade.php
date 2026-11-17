@@ -3,21 +3,35 @@
     $nameParts = preg_split('/\s+/', $name) ?: [$name];
     $lastName = count($nameParts) > 1 ? array_pop($nameParts) : '';
     $firstName = implode(' ', $nameParts) ?: $name;
-    $initials = collect(preg_split('/\s+/', $name) ?: [$name])
-        ->map(fn ($part) => Str::upper(Str::substr($part, 0, 1)))
-        ->take(2)
-        ->implode('') ?: 'P';
     $role = implode(' ', array_slice(preg_split('/\s+/', trim($profile->summary ?? 'Portofolio')) ?: [], 0, 2));
     $competencyShort = trim(explode('(', $profile->competency ?? '')[0] ?? '');
+    $competencyDisplay = $competencyShort === 'PPLG'
+        ? 'PPLG (Pengembangan Perangkat Lunak dan Gim)'
+        : trim($profile->competency ?? '');
     $avatar = $profile->profile_image ? Storage::url($profile->profile_image) : asset('profile.jpg');
-    $resume = $profile->resume_file ? Storage::url($profile->resume_file) : asset('cv-shan-favian-efendy.pdf');
+    $resume = $profile->resume_file && Storage::disk('public')->exists($profile->resume_file)
+        ? Storage::url($profile->resume_file)
+        : asset('cv-digital-shan-favian-efendy.pdf');
     $hardSkills = $skills->get('hard', collect());
     $softSkills = $skills->get('soft', collect());
     $skillCount = $hardSkills->count() + $softSkills->count();
     $experienceCount = $experiences->flatten(1)->count();
     $projectCount = $projects->count();
+    $splitProjectTechnologies = fn ($technologies) => collect(preg_split('/[,;\n]+/', $technologies ?? '') ?: [])
+        ->map(fn ($technology) => trim($technology))
+        ->filter()
+        ->values();
+    $projectFilterOptions = $projects
+        ->pluck('category')
+        ->filter()
+        ->map(fn ($category) => trim($category))
+        ->filter()
+        ->unique(fn ($category) => Str::lower($category))
+        ->sort()
+        ->values();
     $certificateCount = $certificates->count();
     $articleCount = $articles->count();
+    $testimonialCount = $feedback->count();
     $educationItems = collect(preg_split('/\r\n|\r|\n/', $profile->education ?? '') ?: [])
         ->map(fn ($line) => trim($line))
         ->filter()
@@ -38,7 +52,9 @@
     $githubHandle = $profile->github_url ? basename(parse_url($profile->github_url, PHP_URL_PATH) ?? '') : null;
     $instagramHandle = $profile->instagram_url ? basename(parse_url($profile->instagram_url, PHP_URL_PATH) ?? '') : null;
     $isAdmin = session('admin_logged_in');
-    $heroTools = $hardSkills->take(2)->pluck('name');
+    $heroTools = $hardSkills->take(2)
+        ->reject(fn ($skill) => Str::lower(trim($skill->name)) === 'html')
+        ->pluck('name');
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -74,19 +90,20 @@
     <header class="site-header" id="header">
         <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress-bar"></span></div>
         <div class="nav-shell container">
-            <a href="#home" class="brand" aria-label="{{ $name }} — Beranda">
-                <span class="brand__mark" aria-hidden="true">{{ $initials }}</span>
-                <span class="brand__text">{{ $firstName }}<span>.</span></span>
+            <a href="#home" class="brand" aria-label="Portofolio - Beranda">
+                <span class="brand__text">Portofolio</span>
             </a>
 
             <nav class="nav" id="nav-menu" aria-label="Navigasi utama">
                 <ul class="nav__list">
+                    <li><a href="#home" class="nav__link">Beranda</a></li>
                     <li><a href="#about" class="nav__link">Tentang</a></li>
                     <li><a href="#skills" class="nav__link">Keahlian</a></li>
                     <li><a href="#projects" class="nav__link">Proyek</a></li>
                     <li><a href="#certificates" class="nav__link">Sertifikat</a></li>
                     <li><a href="#experiences" class="nav__link">Pengalaman</a></li>
-                    <li><a href="#articles" class="nav__link">Artikel</a></li>
+                    <li><a href="#testimonials" class="nav__link">Testimoni</a></li>
+                    <li><a href="#blog" class="nav__link">Blog</a></li>
                     <li><a href="#contact" class="nav__link">Kontak</a></li>
                 </ul>
             </nav>
@@ -160,30 +177,6 @@
                             </a>
                         @endif
                     </div>
-
-                    <ul class="socials hero__enter" style="--enter-delay: .44s" aria-label="Media sosial">
-                        @if ($profile->github_url)
-                            <li>
-                                <a href="{{ $profile->github_url }}" class="social" target="_blank" rel="noopener noreferrer" aria-label="GitHub {{ $githubHandle }}" title="GitHub">
-                                    <i class="ri-github-fill" aria-hidden="true"></i>
-                                </a>
-                            </li>
-                        @endif
-                        @if ($profile->instagram_url)
-                            <li>
-                                <a href="{{ $profile->instagram_url }}" class="social" target="_blank" rel="noopener noreferrer" aria-label="Instagram {{ $instagramHandle }}" title="Instagram">
-                                    <i class="ri-instagram-line" aria-hidden="true"></i>
-                                </a>
-                            </li>
-                        @endif
-                        @if ($profile->email)
-                            <li>
-                                <a href="mailto:{{ $profile->email }}" class="social" aria-label="Kirim email" title="Email">
-                                    <i class="ri-mail-send-line" aria-hidden="true"></i>
-                                </a>
-                            </li>
-                        @endif
-                    </ul>
                 </div>
 
                 <div class="hero__visual hero__enter" style="--enter-delay: .22s">
@@ -246,7 +239,7 @@
                             </div>
                             <div>
                                 <dt>Jurusan</dt>
-                                <dd>{{ $competencyShort ?: '—' }}</dd>
+                                <dd>{{ $competencyDisplay ?: '—' }}</dd>
                             </div>
                             @if ($profile->email)
                                 <div>
@@ -310,28 +303,10 @@
                         <p class="eyebrow"><span class="eyebrow__num">02</span> Keahlian</p>
                         <h2>Alat dan kemampuan di balik setiap <span class="text-gradient">rancangan</span>.</h2>
                     </div>
-                    <p class="section-head__note">Dari eksplorasi ide di Figma hingga menyusun antarmuka dengan HTML, CSS, dan JavaScript.</p>
+                    <p class="section-head__note">Dari eksplorasi ide di Figma hingga menyusun antarmuka dengan HTML dan CSS.</p>
                 </header>
 
                 <div class="skills-layout">
-                    <aside class="skills-intro" data-reveal>
-                        <div class="skills-stat">
-                            <strong>{{ $skillCount }}</strong>
-                            <span>keahlian yang terus saya asah</span>
-                        </div>
-                        <p class="skills-intro__text">Saya menikmati proses mengubah masalah menjadi solusi visual yang sederhana, konsisten, dan nyaman digunakan.</p>
-                        @if ($hardSkills->whereNotNull('icon')->isNotEmpty())
-                            <div class="skills-mini-logos" aria-hidden="true">
-                                @foreach ($hardSkills->whereNotNull('icon') as $skill)
-                                    <img src="{{ asset($skill->icon) }}" alt="" loading="lazy">
-                                @endforeach
-                            </div>
-                        @endif
-                        <a href="#contact" class="link-arrow">
-                            Diskusikan kebutuhan Anda <i class="ri-arrow-right-up-line" aria-hidden="true"></i>
-                        </a>
-                    </aside>
-
                     <div class="skills-panel">
                         @if ($skillCount === 0)
                             @include('partials.empty-state', [
@@ -347,19 +322,11 @@
                                     <div class="skill-group" data-reveal>
                                         <div class="skill-group__head">
                                             <h3>{{ $group['label'] }}</h3>
-                                            <span>{{ $group['items']->count() }} item</span>
                                         </div>
                                         <div class="skill-grid">
                                             @foreach ($group['items'] as $skill)
                                                 <article class="skill-card" data-glow>
                                                     <div class="skill-card__top">
-                                                        @if ($skill->icon)
-                                                            <img src="{{ asset($skill->icon) }}" alt="" class="skill-card__icon" loading="lazy">
-                                                        @else
-                                                            <span class="skill-card__icon skill-card__icon--fallback">
-                                                                <i class="ri-sparkling-line" aria-hidden="true"></i>
-                                                            </span>
-                                                        @endif
                                                         <div class="skill-card__title">
                                                             <h4>{{ $skill->name }}</h4>
                                                             <span>{{ $skill->percentage }}%</span>
@@ -376,6 +343,13 @@
                             @endforeach
                         @endif
                     </div>
+
+                    <aside class="skills-intro" data-reveal>
+                        <p class="skills-intro__text">Saya menikmati proses mengubah masalah menjadi solusi visual yang sederhana, konsisten, dan nyaman digunakan.</p>
+                        <a href="#contact" class="link-arrow">
+                            Diskusikan kebutuhan Anda <i class="ri-arrow-right-up-line" aria-hidden="true"></i>
+                        </a>
+                    </aside>
                 </div>
             </div>
         </section>
@@ -385,7 +359,7 @@
                 <header class="section-head" data-reveal>
                     <div class="section-head__main">
                         <p class="eyebrow"><span class="eyebrow__num">03</span> Proyek</p>
-                        <h2>Karya yang saya bangun dengan <span class="text-gradient">detail</span>.</h2>
+                        <h2>Karya yang saya <span class="text-gradient">bangun</span>.</h2>
                     </div>
                     <p class="section-head__note">Setiap proyek adalah kesempatan untuk belajar, bereksperimen, dan menyelesaikan masalah nyata.</p>
                 </header>
@@ -399,17 +373,39 @@
                         'actionLabel' => $isAdmin ? 'Tambah proyek' : 'Mulai diskusi',
                     ])
                 @else
-                    <div class="project-grid">
+                    <div class="project-toolbar" data-project-toolbar>
+                        <label class="project-search">
+                            <i class="ri-search-line" aria-hidden="true"></i>
+                            <input type="search" data-project-search aria-label="Cari proyek" placeholder="Cari berdasarkan nama, deskripsi, peran, atau teknologi..." autocomplete="off">
+                        </label>
+
+                        <div class="project-filters" role="group" aria-label="Filter proyek berdasarkan kategori">
+                            <button type="button" class="project-filter is-active" data-project-filter="all" aria-pressed="true">Semua</button>
+                            @foreach ($projectFilterOptions as $category)
+                                <button type="button" class="project-filter" data-project-filter="{{ Str::lower($category) }}" aria-pressed="false">{{ $category }}</button>
+                            @endforeach
+                        </div>
+
+                        <p class="project-toolbar__status" data-project-status role="status" aria-live="polite">
+                            Menampilkan {{ $projectCount }} dari {{ $projectCount }} proyek
+                        </p>
+                    </div>
+
+                    <div class="project-grid" data-project-grid>
                         @foreach ($projects as $project)
                             @php
-                                $techs = collect(preg_split('/[,;]+/', (string) $project->technologies) ?: [])
-                                    ->map(fn ($tech) => trim($tech))
-                                    ->filter()
-                                    ->take(5);
-                                $projectLink = $project->demo_link ?: $project->link;
+                                $projectLink = $project->demo_link ?: $project->link ?: $project->github_link;
+                                $technologyTags = $splitProjectTechnologies($project->technologies);
+                                $searchableProjectText = implode(' ', array_filter([
+                                    $project->title,
+                                    $project->category,
+                                    $project->description,
+                                    $project->role,
+                                    $project->technologies,
+                                ]));
                             @endphp
 
-                            <article class="project-card" data-reveal data-glow>
+                            <article class="project-card" data-project-card data-project-search-text="{{ Str::lower($searchableProjectText) }}" data-project-category="{{ Str::lower(trim($project->category ?? '')) }}" data-reveal data-glow>
                                 <div class="project-card__media">
                                     @if ($project->image)
                                         <img src="{{ Storage::url($project->image) }}" alt="Pratinjau {{ $project->title }}" loading="lazy">
@@ -423,15 +419,20 @@
                                 </div>
 
                                 <div class="project-card__body">
-                                    @if ($techs->isNotEmpty())
-                                        <ul class="tag-list" aria-label="Teknologi yang digunakan">
-                                            @foreach ($techs as $tech)
-                                                <li class="tag">{{ $tech }}</li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
                                     <h3>{{ $project->title }}</h3>
-                                    <p>{{ Str::limit($project->description, 150) }}</p>
+                                    @if ($project->description)
+                                        <p>{{ Str::limit($project->description, 150) }}</p>
+                                    @endif
+                                    @if ($technologyTags->isNotEmpty())
+                                        <div class="project-card__tags" aria-label="Teknologi proyek">
+                                            @foreach ($technologyTags as $technology)
+                                                <span class="project-card__tag">{{ $technology }}</span>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if ($project->category)
+                                        <span class="project-card__tag project-card__tag--category">{{ $project->category }}</span>
+                                    @endif
                                     <button type="button" class="link-arrow" data-open-project="project-{{ $project->id }}">
                                         Pratinjau detail <i class="ri-arrow-right-line" aria-hidden="true"></i>
                                     </button>
@@ -453,20 +454,12 @@
                                             <img src="{{ Storage::url($project->image) }}" alt="Dokumentasi {{ $project->title }}" class="project-dialog__image">
                                         @endif
 
-                                        @if ($project->role || $project->technologies)
+                                        @if ($project->role)
                                             <div class="project-dialog__meta">
-                                                @if ($project->role)
-                                                    <div>
-                                                        <span>Peran</span>
-                                                        <p>{{ $project->role }}</p>
-                                                    </div>
-                                                @endif
-                                                @if ($project->technologies)
-                                                    <div>
-                                                        <span>Teknologi</span>
-                                                        <p>{{ $project->technologies }}</p>
-                                                    </div>
-                                                @endif
+                                                <div>
+                                                    <span>Peran</span>
+                                                    <p>{{ $project->role }}</p>
+                                                </div>
                                             </div>
                                         @endif
 
@@ -487,24 +480,22 @@
                                             @endif
                                         @endforeach
 
-                                        @if ($projectLink || $project->github_link)
+                                        @if ($projectLink)
                                             <div class="project-dialog__links">
-                                                @if ($projectLink)
-                                                    <a class="btn btn--primary btn--sm" href="{{ $projectLink }}" target="_blank" rel="noopener noreferrer">
-                                                        Lihat demo <i class="ri-external-link-line" aria-hidden="true"></i>
-                                                    </a>
-                                                @endif
-                                                @if ($project->github_link)
-                                                    <a class="btn btn--ghost btn--sm" href="{{ $project->github_link }}" target="_blank" rel="noopener noreferrer">
-                                                        Source code <i class="ri-github-fill" aria-hidden="true"></i>
-                                                    </a>
-                                                @endif
+                                                <a class="btn btn--primary btn--sm" href="{{ $projectLink }}" target="_blank" rel="noopener noreferrer">
+                                                    Buka tautan <i class="ri-external-link-line" aria-hidden="true"></i>
+                                                </a>
                                             </div>
                                         @endif
                                     </div>
                                 </dialog>
                             </article>
                         @endforeach
+                    </div>
+                    <div class="project-empty" data-project-empty hidden>
+                        <i class="ri-search-eye-line" aria-hidden="true"></i>
+                        <strong>Proyek tidak ditemukan</strong>
+                        <span>Coba kata kunci atau filter teknologi lain.</span>
                     </div>
                 @endif
             </div>
@@ -515,7 +506,7 @@
                 <header class="section-head" data-reveal>
                     <div class="section-head__main">
                         <p class="eyebrow"><span class="eyebrow__num">04</span> Sertifikat</p>
-                        <h2>Bukti belajar yang saya <span class="text-gradient">kumpulkan</span>.</h2>
+                        <h2>Bukti <span class="text-gradient">sertifikat</span>.</h2>
                     </div>
                     <p class="section-head__note">Sertifikat, prestasi, dan dokumentasi perjalanan belajar yang saya jalani.</p>
                 </header>
@@ -620,11 +611,103 @@
             </div>
         </section>
 
-        <section class="section articles" id="articles">
+        <section class="section testimonials" id="testimonials">
             <div class="container">
                 <header class="section-head" data-reveal>
                     <div class="section-head__main">
-                        <p class="eyebrow"><span class="eyebrow__num">06</span> Artikel</p>
+                        <p class="eyebrow"><span class="eyebrow__num">06</span> Testimoni</p>
+                        <h2>Apa kata mereka setelah <span class="text-gradient">berinteraksi</span>.</h2>
+                    </div>
+                    <p class="section-head__note">Kesan dan pesan dari pengunjung yang telah melihat karya serta perjalanan saya.</p>
+                </header>
+
+                @if ($testimonialCount === 0)
+                    @include('partials.empty-state', [
+                        'icon' => 'ri-chat-quote-line',
+                        'title' => 'Belum ada testimoni',
+                        'text' => 'Testimoni akan tampil di sini setelah pengunjung mengirim kesan dan pesan.',
+                        'action' => '#feedback',
+                        'actionLabel' => 'Tulis kesan',
+                    ])
+                @else
+                    <div class="testimonial-grid">
+                        @foreach ($feedback as $testimonial)
+                            <article class="testimonial-card" data-reveal data-glow>
+                                <span class="testimonial-card__quote" aria-hidden="true">&ldquo;</span>
+                                <p class="testimonial-card__message">{{ $testimonial->message }}</p>
+                                <div class="testimonial-card__person">
+                                    <span class="testimonial-card__avatar" aria-hidden="true">{{ Str::upper(Str::substr($testimonial->name, 0, 1)) }}</span>
+                                    <div>
+                                        <strong>{{ $testimonial->name }}</strong>
+                                        @if ($testimonial->rating)
+                                            <span class="testimonial-card__rating" aria-label="Rating {{ $testimonial->rating }} dari 5">
+                                                @for ($star = 1; $star <= 5; $star++)
+                                                    <i class="{{ $star <= $testimonial->rating ? 'ri-star-fill' : 'ri-star-line' }}" aria-hidden="true"></i>
+                                                @endfor
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="testimonial-submit" data-reveal>
+                    <div class="testimonial-submit__copy">
+                        <p class="card-label"><i class="ri-chat-quote-line" aria-hidden="true"></i> Kirim testimoni</p>
+                        <h3>Beri kesan tentang portofolio ini</h3>
+                        <p>Pesan yang dikirim di sini akan ditampilkan sebagai testimoni.</p>
+                    </div>
+                    <form action="{{ route('feedback.store') }}" method="POST" class="form testimonial-form">
+                        @csrf
+                        <input type="hidden" name="kind" value="testimonial">
+                        <div class="field">
+                            <label for="testimonial-name">Nama</label>
+                            <input id="testimonial-name" type="text" name="name" maxlength="255" value="{{ old('kind') === 'testimonial' ? old('name') : '' }}" required placeholder="Nama Anda" autocomplete="name">
+                            @if (old('kind') === 'testimonial')
+                                @error('name')<p class="form__error">{{ $message }}</p>@enderror
+                            @endif
+                        </div>
+                        <div class="field rating-field">
+                            <label for="testimonial-rating">Rating</label>
+                            <select id="testimonial-rating" name="rating" required>
+                                @for ($rating = 5; $rating >= 1; $rating--)
+                                    <option value="{{ $rating }}" {{ (int) old('rating', 5) === $rating ? 'selected' : '' }}>
+                                        {{ $rating }} {{ $rating === 1 ? 'star' : 'stars' }}
+                                    </option>
+                                @endfor
+                            </select>
+                            @if (old('kind') === 'testimonial')
+                                @error('rating')<p class="form__error">{{ $message }}</p>@enderror
+                            @endif
+                        </div>
+                        <div class="field">
+                            <label for="testimonial-message">Pesan testimoni</label>
+                            <textarea id="testimonial-message" name="message" required maxlength="10000" placeholder="Tulis testimoni Anda...">{{ old('kind') === 'testimonial' ? old('message') : '' }}</textarea>
+                            @if (old('kind') === 'testimonial')
+                                @error('message')<p class="form__error">{{ $message }}</p>@enderror
+                            @endif
+                        </div>
+                        @if (session('feedback_success') && old('kind') === 'testimonial')
+                            <p class="form__success" role="status">
+                                <i class="ri-checkbox-circle-line" aria-hidden="true"></i>
+                                {{ session('feedback_success') }}
+                            </p>
+                        @endif
+                        <button type="submit" class="btn btn--primary">
+                            Kirim testimoni <i class="ri-send-plane-line" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="section articles" id="blog">
+            <div class="container">
+                <header class="section-head" data-reveal>
+                    <div class="section-head__main">
+                        <p class="eyebrow"><span class="eyebrow__num">07</span> Blog</p>
                         <h2>Catatan seputar desain dan <span class="text-gradient">kode</span>.</h2>
                     </div>
                     <p class="section-head__note">Tulisan singkat tentang proses belajar, eksplorasi desain, dan hal-hal yang saya temukan di jalan.</p>
@@ -633,10 +716,10 @@
                 @if ($articleCount === 0)
                     @include('partials.empty-state', [
                         'icon' => 'ri-article-line',
-                        'title' => 'Belum ada artikel',
+                        'title' => 'Belum ada tulisan',
                         'text' => 'Catatan dan tulisan baru akan tampil di sini setelah dipublikasikan.',
                         'action' => $isAdmin ? route('admin.articles.create') : null,
-                        'actionLabel' => 'Tulis artikel',
+                        'actionLabel' => 'Tulis blog',
                     ])
                 @else
                     <div class="article-grid">
@@ -649,7 +732,7 @@
                                 <h3>{{ $article->title }}</h3>
                                 <p>{{ Str::limit($article->excerpt ?: $article->body, 150) }}</p>
                                 <a href="{{ route('articles.show', $article->slug) }}" class="link-arrow">
-                                    Baca artikel <i class="ri-arrow-right-line" aria-hidden="true"></i>
+                                    Baca selengkapnya <i class="ri-arrow-right-line" aria-hidden="true"></i>
                                 </a>
                             </article>
                         @endforeach
@@ -662,7 +745,7 @@
             <div class="container">
                 <div class="contact-layout">
                     <div class="contact-copy" data-reveal>
-                        <p class="eyebrow"><span class="eyebrow__num">07</span> Kontak</p>
+                        <p class="eyebrow"><span class="eyebrow__num">08</span> Kontak</p>
                         <h2>Punya ide? Mari kita <span class="text-gradient">wujudkan</span> bersama.</h2>
                         <p class="contact-copy__text">Saya terbuka untuk diskusi proyek, kolaborasi, atau sekadar bertukar pikiran tentang desain dan pengembangan web.</p>
 
@@ -702,29 +785,6 @@
                         <p class="contact-note"><i class="ri-time-line" aria-hidden="true"></i> Terbuka untuk proyek, kolaborasi, atau sekadar berbagi ide.</p>
                     </div>
 
-                    <div class="contact-form-card" data-reveal style="--reveal-delay: .08s" data-glow>
-                        <form action="{{ route('contact.send') }}" method="POST" class="form" id="contact-form">
-                            @csrf
-                            <div class="form__row">
-                                <div class="field">
-                                    <label for="contact-name">Nama</label>
-                                    <input id="contact-name" type="text" name="name" required maxlength="255" placeholder="Nama lengkap" autocomplete="name">
-                                </div>
-                                <div class="field">
-                                    <label for="contact-email">Email</label>
-                                    <input id="contact-email" type="email" name="email" required maxlength="255" placeholder="nama@email.com" autocomplete="email">
-                                </div>
-                            </div>
-                            <div class="field">
-                                <label for="contact-message-input">Pesan</label>
-                                <textarea id="contact-message-input" name="message" required maxlength="5000" placeholder="Ceritakan ide atau kebutuhan Anda..."></textarea>
-                            </div>
-                            <p class="form__status" id="contact-message" role="status" aria-live="polite"></p>
-                            <button type="submit" class="btn btn--primary form__submit">
-                                Kirim pesan <i class="ri-send-plane-line" aria-hidden="true"></i>
-                            </button>
-                        </form>
-                    </div>
                 </div>
             </div>
         </section>
@@ -733,7 +793,7 @@
             <div class="container">
                 <div class="feedback-panel" data-reveal>
                     <div class="feedback-panel__copy">
-                        <p class="eyebrow"><span class="eyebrow__num">08</span> Buku tamu</p>
+                        <p class="eyebrow"><span class="eyebrow__num">09</span> Buku tamu</p>
                         <h2>Kesan &amp; pesan</h2>
                         <p>Terima kasih sudah mampir. Tinggalkan kesan, saran, atau pesan yang bisa membantu saya berkembang.</p>
                         <span class="feedback-panel__quote" aria-hidden="true"><i class="ri-double-quotes-r"></i></span>
@@ -741,6 +801,7 @@
 
                     <form action="{{ route('feedback.store') }}" method="POST" class="form feedback-form">
                         @csrf
+                        <input type="hidden" name="kind" value="guestbook">
                         <div class="field">
                             <label for="feedback-name">Nama</label>
                             <input id="feedback-name" type="text" name="name" maxlength="255" value="{{ old('name') }}" required placeholder="Nama Anda" autocomplete="name">
@@ -770,22 +831,10 @@
         <div class="container">
             <div class="footer__top">
                 <div class="footer__brand">
-                    <a href="#home" class="brand" aria-label="{{ $name }} — Beranda">
-                <span class="brand__mark" aria-hidden="true">{{ $initials }}</span>
-                        <span class="brand__text">{{ $firstName }}<span>.</span></span>
-                    </a>
+                    <span class="brand is-static" aria-label="Portofolio — Beranda" aria-disabled="true" tabindex="-1">
+                        <span class="brand__text">Portofolio</span>
+                    </span>
                     <p>{{ $profile->summary }}</p>
-                    <ul class="socials" aria-label="Media sosial">
-                        @if ($profile->github_url)
-                            <li><a href="{{ $profile->github_url }}" class="social" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub"><i class="ri-github-fill" aria-hidden="true"></i></a></li>
-                        @endif
-                        @if ($profile->instagram_url)
-                            <li><a href="{{ $profile->instagram_url }}" class="social" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><i class="ri-instagram-line" aria-hidden="true"></i></a></li>
-                        @endif
-                        @if ($profile->email)
-                            <li><a href="mailto:{{ $profile->email }}" class="social" aria-label="Email" title="Email"><i class="ri-mail-line" aria-hidden="true"></i></a></li>
-                        @endif
-                    </ul>
                 </div>
 
                 <nav class="footer__nav" aria-label="Navigasi footer">
@@ -795,6 +844,7 @@
                         <li><a href="#skills">Keahlian</a></li>
                         <li><a href="#projects">Proyek</a></li>
                         <li><a href="#experiences">Pengalaman</a></li>
+                        <li><a href="#testimonials">Testimoni</a></li>
                     </ul>
                 </nav>
 

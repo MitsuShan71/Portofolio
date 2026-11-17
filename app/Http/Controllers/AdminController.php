@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use App\Models\Certificate;
 use App\Models\Experience;
-use App\Models\Message;
+use App\Models\Feedback;
 use App\Models\PortfolioProfile;
 use App\Models\Project;
 use App\Models\Skill;
@@ -28,24 +28,26 @@ class AdminController extends Controller
 
             return back()->withErrors([
                 'login' => "Too many login attempts. Please try again in {$seconds} seconds.",
-            ])->onlyInput('username');
+            ])->onlyInput('email');
         }
 
         $request->validate([
-            'username' => 'required',
+            'email' => ['required', 'email', 'regex:/^[^@\s]+@gmail\.com$/i'],
             'password' => 'required',
+        ], [
+            'email.regex' => 'Gunakan alamat email dengan domain @gmail.com.',
         ]);
 
-        $username = config('admin.username');
+        $email = config('admin.email');
         $password = config('admin.password');
 
-        if (! $username || ! $password) {
+        if (! $email || ! str_ends_with(strtolower($email), '@gmail.com') || ! $password) {
             return back()->withErrors([
-                'login' => 'Admin credentials are not configured. Please set ADMIN_USERNAME and ADMIN_PASSWORD in your .env file.',
-            ])->onlyInput('username');
+                'login' => 'Admin credentials are not configured. Please set ADMIN_EMAIL to a Gmail address and ADMIN_PASSWORD in your .env file.',
+            ])->onlyInput('email');
         }
 
-        if ($request->username === $username && $request->password === $password) {
+        if (strtolower($request->email) === strtolower($email) && $request->password === $password) {
             RateLimiter::clear($rateLimitKey);
 
             $request->session()->regenerate();
@@ -56,7 +58,7 @@ class AdminController extends Controller
 
         RateLimiter::hit($rateLimitKey, 60);
 
-        return back()->withErrors(['login' => 'Invalid credentials.'])->onlyInput('username');
+        return back()->withErrors(['login' => 'Invalid credentials.'])->onlyInput('email');
     }
 
     public function dashboard()
@@ -72,7 +74,7 @@ class AdminController extends Controller
             'experiences' => Experience::count(),
             'skills' => Skill::count(),
             'certificates' => Certificate::count(),
-            'messages' => Message::count(),
+            'testimonials' => Feedback::where('kind', 'testimonial')->count(),
         ];
 
         return view('admin.dashboard', compact('firstName', 'counts'));

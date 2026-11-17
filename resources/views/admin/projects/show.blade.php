@@ -39,15 +39,14 @@
                 <h2>Informasi proyek</h2>
                 <div class="admin-detail__meta">
                     <span class="admin-badge admin-badge--live">Proyek</span>
-                    @if ($project->technologies)
-                        <span>{{ $project->technologies }}</span>
+                    @if ($project->role)
+                        <span>{{ $project->role }}</span>
                     @endif
                 </div>
 
                 @foreach ([
                     'problem_solved' => 'Masalah yang diselesaikan',
                     'objective' => 'Tujuan proyek',
-                    'technologies' => 'Teknologi yang digunakan',
                     'role' => 'Peran',
                     'features' => 'Fitur utama',
                     'process_documentation' => 'Dokumentasi proses',
@@ -63,22 +62,13 @@
                 @endforeach
 
                 <div class="admin-detail__actions">
-                    @if ($project->demo_link)
-                        <a href="{{ $project->demo_link }}" target="_blank" rel="noopener noreferrer" class="admin-btn admin-btn--primary">
+                    @php
+                        $projectLink = $project->demo_link ?: $project->link ?: $project->github_link;
+                    @endphp
+                    @if ($projectLink)
+                        <a href="{{ $projectLink }}" target="_blank" rel="noopener noreferrer" class="admin-btn admin-btn--primary">
                             <i class="ri-external-link-line" aria-hidden="true"></i>
-                            Buka demo
-                        </a>
-                    @endif
-                    @if ($project->github_link)
-                        <a href="{{ $project->github_link }}" target="_blank" rel="noopener noreferrer" class="admin-btn admin-btn--ghost">
-                            <i class="ri-github-line" aria-hidden="true"></i>
-                            Lihat sumber
-                        </a>
-                    @endif
-                    @if ($project->link)
-                        <a href="{{ $project->link }}" target="_blank" rel="noopener noreferrer" class="admin-btn admin-btn--ghost">
-                            <i class="ri-link" aria-hidden="true"></i>
-                            Tautan tambahan
+                            Buka tautan
                         </a>
                     @endif
                     <form action="{{ route('admin.projects.destroy', $project) }}" method="POST" class="admin-inline-form" data-confirm="Hapus proyek ini?">

@@ -24,11 +24,11 @@ class ProjectController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'category' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'link' => 'nullable|url|max:255',
             'problem_solved' => 'nullable|string',
             'objective' => 'nullable|string',
-            'technologies' => 'nullable|string',
             'role' => 'nullable|string',
             'features' => 'nullable|string',
             'demo_link' => 'nullable|url|max:255',
@@ -36,7 +36,7 @@ class ProjectController extends Controller
             'process_documentation' => 'nullable|string',
             'user_feedback' => 'nullable|string',
             'details' => 'nullable|string',
-            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
@@ -63,11 +63,11 @@ class ProjectController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'category' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'link' => 'nullable|url|max:255',
             'problem_solved' => 'nullable|string',
             'objective' => 'nullable|string',
-            'technologies' => 'nullable|string',
             'role' => 'nullable|string',
             'features' => 'nullable|string',
             'demo_link' => 'nullable|url|max:255',
@@ -75,7 +75,7 @@ class ProjectController extends Controller
             'process_documentation' => 'nullable|string',
             'user_feedback' => 'nullable|string',
             'details' => 'nullable|string',
-            'image' => [$project->image ? 'nullable' : 'required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {

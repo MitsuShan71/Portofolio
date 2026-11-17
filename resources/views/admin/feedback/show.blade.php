@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="admin-page">
-        <a href="{{ route('admin.feedback.index') }}" class="admin-back">
+        <a href="{{ $feedback->kind === 'testimonial' ? route('admin.testimonials.index') : route('admin.feedback.index') }}" class="admin-back">
             <i class="ri-arrow-left-line" aria-hidden="true"></i>
             Kembali ke kesan & pesan
         </a>
@@ -29,6 +29,16 @@
                         <strong>{{ $feedback->name }}</strong>
                     </div>
                     <div class="admin-meta-item">
+                        <span>Jenis</span>
+                        <strong>{{ $feedback->kind === 'testimonial' ? 'Testimoni' : 'Buku tamu' }}</strong>
+                    </div>
+                    @if ($feedback->kind === 'testimonial')
+                        <div class="admin-meta-item">
+                            <span>Rating</span>
+                            <strong>{{ $feedback->rating ? $feedback->rating . ' / 5' : '-' }}</strong>
+                        </div>
+                    @endif
+                    <div class="admin-meta-item">
                         <span>Diterima</span>
                         <strong>{{ $feedback->created_at->format('d M Y, H:i') }}</strong>
                     </div>
@@ -37,7 +47,7 @@
                 <div class="admin-message-box">{{ $feedback->message }}</div>
 
                 <div class="admin-detail__actions">
-                    <a href="{{ route('admin.feedback.index') }}" class="admin-btn admin-btn--ghost">
+                    <a href="{{ $feedback->kind === 'testimonial' ? route('admin.testimonials.index') : route('admin.feedback.index') }}" class="admin-btn admin-btn--ghost">
                         <i class="ri-arrow-left-line" aria-hidden="true"></i>
                         Kembali
                     </a>

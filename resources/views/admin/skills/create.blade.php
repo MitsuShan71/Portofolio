@@ -18,7 +18,7 @@
         </header>
 
         <section class="admin-panel admin-form-panel">
-            <form action="{{ route('admin.skills.store') }}" method="POST" enctype="multipart/form-data" class="admin-form">
+            <form action="{{ route('admin.skills.store') }}" method="POST" class="admin-form">
                 @csrf
 
                 <div class="admin-form__grid">
@@ -51,20 +51,6 @@
                         <input type="number" name="sort_order" id="sort_order" min="0" step="1" value="{{ old('sort_order', 0) }}" class="admin-input">
                         @error('sort_order') <span class="admin-error">{{ $message }}</span> @enderror
                     </div>
-                </div>
-
-                <div class="admin-field">
-                    <label for="icon" class="admin-label">Ikon (class Remix Icon)</label>
-                    <input type="text" name="icon" id="icon" value="{{ old('icon') }}" class="admin-input" placeholder="Contoh: ri-reactjs-line">
-                    <span class="admin-hint">Kosongkan jika ingin mengunggah gambar ikon.</span>
-                    @error('icon') <span class="admin-error">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="admin-field">
-                    <label for="icon_image" class="admin-label">Atau unggah gambar ikon</label>
-                    <input type="file" name="icon_image" id="icon_image" accept="image/jpeg,image/png,image/webp" class="admin-input">
-                    <span class="admin-hint">JPG, PNG, atau WebP dengan ukuran maksimal 2 MB.</span>
-                    @error('icon_image') <span class="admin-error">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="admin-form__actions">
