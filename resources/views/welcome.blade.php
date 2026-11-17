@@ -394,7 +394,7 @@
                     <div class="project-grid" data-project-grid>
                         @foreach ($projects as $project)
                             @php
-                                $projectLink = $project->demo_link ?: $project->link ?: $project->github_link;
+                                $demoLink = $project->demo_link ?: $project->link;
                                 $technologyTags = $splitProjectTechnologies($project->technologies);
                                 $searchableProjectText = implode(' ', array_filter([
                                     $project->title,
@@ -480,11 +480,18 @@
                                             @endif
                                         @endforeach
 
-                                        @if ($projectLink)
+                                        @if ($demoLink || $project->github_link)
                                             <div class="project-dialog__links">
-                                                <a class="btn btn--primary btn--sm" href="{{ $projectLink }}" target="_blank" rel="noopener noreferrer">
-                                                    Buka tautan <i class="ri-external-link-line" aria-hidden="true"></i>
-                                                </a>
+                                                @if ($demoLink)
+                                                    <a class="btn btn--primary btn--sm" href="{{ $demoLink }}" target="_blank" rel="noopener noreferrer">
+                                                        Lihat demo <i class="ri-external-link-line" aria-hidden="true"></i>
+                                                    </a>
+                                                @endif
+                                                @if ($project->github_link)
+                                                    <a class="btn btn--ghost btn--sm" href="{{ $project->github_link }}" target="_blank" rel="noopener noreferrer">
+                                                        GitHub <i class="ri-github-fill" aria-hidden="true"></i>
+                                                    </a>
+                                                @endif
                                             </div>
                                         @endif
                                     </div>

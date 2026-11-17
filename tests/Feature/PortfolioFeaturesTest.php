@@ -186,8 +186,8 @@ class PortfolioFeaturesTest extends TestCase
             ->assertSee('role="progressbar"', false)
             ->assertSee('href="https://example.com/demo"', false)
             ->assertSee('href="https://github.com/example/repo"', false)
-            ->assertDontSee('Pratinjau detail')
-            ->assertDontSee('Problem statement');
+            ->assertSee('Pratinjau detail')
+            ->assertSee('Problem statement');
     }
 
     public function test_projects_can_be_searched_and_filtered_by_category(): void
